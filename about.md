@@ -2,7 +2,7 @@
 layout: about
 path: /about
 url: index.html
-image: lime.jpeg
+image: "lime.jpeg"
 ---
 
 ## Overview
