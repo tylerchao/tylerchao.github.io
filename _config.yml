@@ -3,7 +3,7 @@ title:              Portfolio Template
 email:              your-email@domain.com
 description:        "Portfolio template for students in the MSR program at Northwestern University"
 url:                "http://localhost:4000"
-baseurl:            /msr-student-template
+baseurl:            https://katie-hughes.github.io/
 
 # File structure settings
 image_path:         /public/images
