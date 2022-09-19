@@ -1,7 +1,7 @@
 # Site settings
-title:              Portfolio Template
-email:              your-email@domain.com
-description:        "Portfolio template for students in the MSR program at Northwestern University"
+title:              Katie Hughes
+email:              katiereeshughes@gmail.com
+description:        "My Portfolio"
 url:                "http://localhost:4000"
 baseurl:            https://katie-hughes.github.io/
 
