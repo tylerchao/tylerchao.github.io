@@ -1,19 +1,16 @@
-# Site settings
-title:              Katie Hughes
-email:              katiereeshughes@gmail.com
-description:        "My Portfolio"
-url:                "http://localhost:4000"
-baseurl:            https://katie-hughes.github.io/
+# User config
+author: "Katie Hughes"
+tagline: "Katie Hughes Portfolio"
+description: "Katie Hughes Portfolio"
+keywords: "Katie Hughes, Northwestern, Robotics"
+email: "katiereeshughes@gmail.com"
+linkedin: "https://www.linkedin.com/"
+twitter: "https://twitter.com/"
+github: "https://github.com/"
 
-# File structure settings
-image_path:         /public/images
-
-# Build settings
-markdown:           kramdown
-permalink:          pretty
-
-# Collection definitions and settings
-collections:
-  projects:
-    output: true
-    permalink: /projects/:path/
+# Site config
+baseurl: ""
+highlighter: rouge
+sass:
+  sass_dir: assets/scss
+  style: compressed
