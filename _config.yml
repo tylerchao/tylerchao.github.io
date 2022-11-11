@@ -1,12 +1,12 @@
 # User config
-author: "James Avtges"
-tagline: "James Avtges' Portfolio"
-description: "Roboticist, Maker, Masters in Robotics at Northwestern University. My work focuses on robot learning specialized for agents with mechanical intelligence. Currently in search of PhD opportunities!"
-keywords: "ROS, Robotics, Perception"
-email: "jamesavtges2022@u.northwestern.edu"
-resume: "https://drive.google.com/file/d/18qjfvSo39FrgH8zQ6LbvoGhphcwPj3IM/view?usp=sharing"
-linkedin: "https://www.linkedin.com/in/james-avtges/"
-github: "https://github.com/javtges"
+author: "Katie Hughes"
+tagline: "Katie Hughes's Portfolio"
+description: "My description"
+keywords: "Keywords"
+email: "khughes1@u.northwestern.edu"
+resume: "resumelink"
+linkedin: "https://www.linkedin.com/in/katie-rees-hughes/"
+github: "https://github.com/katie-hughes"
 
 
 # Site config
