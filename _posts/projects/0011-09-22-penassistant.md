@@ -10,7 +10,7 @@ project:
   title: "Pen Assistant"
   type: "Jekyll"
   url: "https://github.com/katie-hughes/PenChallenge"
-  logo: "/assets/images/projects/redpineapple/logo.png"
+  logo: "/assets/images/projects/pen/Pen.png"
   tech: "ROS, Computer Vision"
 
 ---
