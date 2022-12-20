@@ -9,7 +9,7 @@
 }
 
 .header {
-	background: $color-white;
+	background: $color-blue;
 	padding: 3rem 0;
 }
 
@@ -46,10 +46,12 @@
 
 .intro,
 .projects {
-	padding: 0 0 5rem;
+	padding: 0 0 1rem;
 }
 
 .intro {
+	margin-top: -9rem;
+	margin-bottom: 0rem;
 	@media (min-width: $breakpoint-medium) {
 		p {
 			font-size: 2.7rem;
@@ -245,8 +247,8 @@
 }
 
 .project-navigation {
-	background: $color-black;
-	padding: 5rem 0;
+	background: $color-white;
+	padding: 1rem 0;
 
 	a {
 		color: $color-white;
@@ -359,10 +361,10 @@
 }
 
 .footer {
-	background: $color-alabaster;
+	background: $color-blue;
 	bottom: 0;
 	left: 0;
-	padding: 5rem 0;
+	padding: 1rem 0;
 	position: fixed;
 	right: 0;
 	z-index: -1;
