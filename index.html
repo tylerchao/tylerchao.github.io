@@ -12,15 +12,9 @@
 <body>
 	{% include header.html %}
 	<main class="content">
-		<section class="intro">
-			<div class="container">
-				<h2>About me!</h2>
-				<p class="semibold">{{ site.description }}</p>
-			</div>
-		</section>
 		<section class="projects">
 			<div class="container">
-				<h2>Projects</h2>
+				<h1>My Projects</h1>
 				<ul class="projects-list">
 					{% for item in site.categories.projects reversed %}
 						<li>
@@ -34,6 +28,12 @@
 						</li>
 					{% endfor %}
 				</ul>
+			</div>
+		</section>
+		<section class="intro">
+			<div class="container">
+				<h1><br><br><br><br><br><br>About me!</h1>
+				<p class="body">{{ site.description }}</p>
 			</div>
 		</section>
 	</main>
