@@ -22,7 +22,7 @@
 								<div class="img-wrapper">
 									<img src="{{ item.project.logo | prepend: site.baseurl }}" alt="{{ item.project.title }}" />
 								</div>
-								<span class="h2">{{ item.project.tech }}</span>
+								<span class="h5">{{ item.project.tech }}</span>
 								<h3>{{ item.project.title }}</h3>
 							</a>
 						</li>
@@ -30,10 +30,18 @@
 				</ul>
 			</div>
 		</section>
-		<section class="intro">
+		
+		<!-- <section class="intro">
 			<div class="container">
 				<h1><br><br><br><br><br><br>About me!</h1>
 				<p class="body">{{ site.description }}</p>
+			</div>
+		</section> -->
+		<section class="intro">
+			<div class="container">
+				<!-- <h2>About me!</h2> -->
+				<p class="semibold"><br><br><br>About me!</p>
+				<h5>{{ site.description }}</h5>
 			</div>
 		</section>
 	</main>

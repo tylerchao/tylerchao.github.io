@@ -58,6 +58,17 @@ h4,
     text-transform: uppercase;
 }
 
+h5,
+.h5 {
+	color: $color-black;
+	font-family: $font-poppins;
+    font-size: 2.0rem;
+    font-weight: 300;
+    line-height: 1.2;
+    margin: 0;
+	margin-bottom: 8px;
+}
+
 p {
 	margin: 0;
 	font-weight:400
