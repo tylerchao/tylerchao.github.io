@@ -6,6 +6,10 @@
 	<meta name="description" content="{{ page.content | strip_html | strip_newlines }}">
 	<meta name="keywords" content="{{ page.meta.keywords }}">
 	{% include head.html %}
+	<!-- Mathjax Support -->
+	<script type="text/javascript" async
+	src="https://cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-MML-AM_CHTML">
+	</script>
 </head>
 <body>
 	{% include header.html %}
@@ -62,3 +66,4 @@
 	<script src="{{ "/assets/scripts/project.js" | prepend: site.baseurl }}"></script>
 </body>
 </html>
+
