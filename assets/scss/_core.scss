@@ -117,9 +117,10 @@ code {
 	background: $color-white;
 	border: 1px solid $color-silver-chalice;
 	border-radius: 3px;
-	font-family: $font-lekton;
+	font-family: $font-ubuntu;
 	font-size: 1.5rem;	
 	padding: .1rem .4rem;
+	white-space: pre-wrap;
 
 	var {
 		font-style: italic;
