@@ -85,10 +85,12 @@ a {
 	text-decoration: none;
 }
 
+// unordered list
 ul {
 	margin: 0;
 	padding: 0;
-	list-style-type: none;	
+	list-style-type: disc;
+	font-weight: 400;
 }
 
 img {
@@ -199,5 +201,5 @@ blockquote {
 }
 
 pre {
-	margin: 0 0 3rem;
+	margin: 0 0 0rem;
 }
