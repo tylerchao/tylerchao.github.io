@@ -94,6 +94,12 @@ ul {
 	font-weight: 400;
 }
 
+ul.no-bullet {
+    margin: 0;
+	padding: 0;
+	list-style-type: none;	
+}
+
 img {
 	display: block;
 	max-width: 100%;
