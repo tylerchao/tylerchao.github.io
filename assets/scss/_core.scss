@@ -69,6 +69,17 @@ h5,
 	margin-bottom: 8px;
 }
 
+h6,
+.h6 {
+	color: $color-gray;
+	font-family: $font-poppins;
+    font-size: 1.8rem;
+    font-weight: 300;
+    line-height: 1.2;
+    margin: 0;
+	margin-bottom: 8px;
+}
+
 p {
 	margin: 0;
 	font-weight:400
