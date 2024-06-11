@@ -112,13 +112,13 @@
 		&:before {
 			content: "View Project";
 			color: $color-white;
-			@extend .h2;
+			@extend .h3;
 			font-weight: 800;
 			position: absolute;
 			top: 50%;
-			left: 50%;
-			margin-top: -.5rem;
-			margin-left: -4.4rem;
+			left: 30%;
+			// margin-top: -.5rem;
+			// margin-left: -4.4rem;
 			opacity: 0;
 			-webkit-transition: all .5s ease-in-out;
     		transition: all .5s ease-in-out;

@@ -1,11 +1,14 @@
 # User config
 author: "Katie Hughes"
 tagline: "Katie Hughes's Portfolio"
-description: "I'm a masters in robotics student at Northwestern University set to graduate
-in December 2023. I earned my BA in physics and a minor in computer science from the University of 
-Chicago in 2021. After my graduation, I worked for the ATLAS Experiment at CERN for one year as a 
-part of the University of Chicago high energy physics group. This past summer, I interned at 
-Boston Dynamics as a part of the Stretch team. Feel free to reach out to me about any of my projects!"
+description: "Hi, I'm Katie! I earned my BA in physics and a minor in computer science from the University of Chicago in 2021. 
+After my graduation, I worked for the ATLAS Experiment at CERN for one year as a part of the UChicago high energy physics group. 
+I then went on to get my MS in Robotics from Northwestern University in 2023. During this time, I had the opportunity to intern 
+at Boston Dynamics as a part of the Stretch behavior team. My capstone project focused on implementing a social 
+navigation pipeline onto a Unitree Go1 quadruped robot. 
+I currently work at the AI Institute as a robotics software development engineer focusing on Spot applications -- 
+including maintaining the open source Spot ROS 2 driver. 
+Feel free to reach out to me about any of my projects!"
 keywords: "Keywords"
 email: "khughes1@u.northwestern.edu"
 resume: "https://drive.google.com/file/d/1U-0fPyps2sgKbNdxp-qpJKZsqDvSDCwj/view?usp=sharing"
