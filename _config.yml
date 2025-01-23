@@ -1,19 +1,19 @@
 # User config
-author: "Katie Hughes"
-tagline: "Katie Hughes's Portfolio"
-description: "Hi, I'm Katie! I earned my BA in physics and a minor in computer science from the University of Chicago in 2021. 
-After my graduation, I worked for the ATLAS Experiment at CERN for one year as a part of the UChicago high energy physics group. 
-I then went on to get my MS in Robotics from Northwestern University in 2023. During this time, I had the opportunity to intern 
-at Boston Dynamics as a part of the Stretch behavior team. My capstone project focused on implementing a social 
-navigation pipeline onto a Unitree Go1 quadruped robot. 
-I currently work at the AI Institute as a robotics software development engineer focusing on Spot applications -- 
-including maintaining the open source Spot ROS 2 driver. 
-Feel free to reach out to me about any of my projects!"
+author: "Chien-Hsun (Tyler), Chao"
+tagline: "Chien-Hsun's Portfolio"
+description: "Hi, I’m Chien-Hsun, but you can also call me Tyler. I am passionate about robotics and technology innovation, especially humanoid robots. 
+              I hold a Master’s degree in IT Engineering from Fachhochschule Wedel, Germany (2023), and a Bachelor’s degree in Automatic Control Engineering with a focus on Biomedical Engineering from Feng Chia University, Taiwan.
+
+              During my academic journey, I have worked on diverse technical projects spanning embedded systems, IT projects, and robotics. These projects allowed me to master various programming languages and 
+              tools, including MQTT, IoT communication systems, Python, Java, Embedded C, AutoCAD, MATLAB, RoboDK, and Kuka industrial robots and microcontrollers.
+
+              Currently, I am exploring advanced robotics concepts by self-learning Robot Operating System 2 (ROS2) and developing a project that integrates gesture recognition with a camera system. 
+              This project will be using Python, and C++ as the main programming language. My ultimate goal is to contribute to the development of humanoid robots that bring significant benefits to humanity"
 keywords: "Keywords"
-email: "khughes1@u.northwestern.edu"
-resume: "https://drive.google.com/file/d/1U-0fPyps2sgKbNdxp-qpJKZsqDvSDCwj/view?usp=sharing"
-linkedin: "https://www.linkedin.com/in/katie-rees-hughes/"
-github: "https://github.com/katie-hughes"
+email: "tylerchao2005@gmail.com"
+resume: ""
+linkedin: "https://www.linkedin.com/in/chien-hsun-chao-49b574216/"
+github: "https://github.com/tylerchao"
 
 
 # Site config
