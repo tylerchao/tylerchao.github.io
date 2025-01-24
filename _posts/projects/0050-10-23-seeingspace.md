@@ -9,14 +9,16 @@ meta:
 project:
   title: "Seeing Space"
   type: "Jekyll"
-  url: "https://github.com/tylerchao"
-  logo: "/assets/images/projects/unitree/unitree_cropped.PNG"
+  url: "https://github.com/tylerchao/Seeingspace"
+  logo: "/assets/images/projects/seeingspace/seeingspace1x1.png"
   tech: "MQTT, Internet of Things (IoT), Robotic "
 
 ---
 
-
-<p>This project, inspired by the talks from Bret Victor, presents a prototype of the SeeingSpace, focusing on achieving the Seeing inside and Seeing across time concepts. The prototype comprises an observed robotic project and a user interface. The observed robotic project used in this prototype is the JENGA project, where a KUKA robotic arm and a Cognex camera are employed to build a JENGA tower. The user interface utilizes the Node-RED dashboard serving as the interface for visualizing the changing data from the developing project. The Message Queuing Telemetry Transport (MQTT) publish-subscribe pattern is utilized as the main communication approach between the JENGA project and the Node-RED dashboard.
+<p>
+The project's tiltle is Visualizing Real-Time Data and Performance Metrics in KUKA Robot Experimentation.
+<br>
+This project, inspired by the talks from Bret Victor, presents a prototype of the SeeingSpace, focusing on achieving the Seeing inside and Seeing across time concepts. The prototype comprises an observed robotic project and a user interface. The observed robotic project used in this prototype is the JENGA project, where a KUKA robotic arm and a Cognex camera are employed to build a JENGA tower. The user interface utilizes the Node-RED dashboard serving as the interface for visualizing the changing data from the developing project. The Message Queuing Telemetry Transport (MQTT) publish-subscribe pattern is utilized as the main communication approach between the JENGA project and the Node-RED dashboard.
 
 <br><br>
 
@@ -55,9 +57,8 @@ structure, Node-RED dashboard visualization, camera system, and video playback.
 
 <br>
 
-
 <img src="/assets/images/projects/seeingspace/sixStages.png" alt="Description" style="width:100%; height:auto;">
-<center><h2>Six-stage diagram</h2></center>
+<center><h2>Six-stages diagram</h2></center>
 
 <br>
 
@@ -69,3 +70,4 @@ structure, Node-RED dashboard visualization, camera system, and video playback.
 <center><h2>The visualizing performance experiment results</h2></center>
 
 <br>
+
