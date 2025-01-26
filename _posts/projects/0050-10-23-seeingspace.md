@@ -13,7 +13,22 @@ project:
   logo: "/assets/images/projects/seeingspace/seeingspace1x1.png"
   tech: "MQTT, Internet of Things (IoT), Robotic "
 
+7pieces: ST-r9X2dZMg
+10pieces: pXBVbCDGRMg
+
+ehh: 7X1oRuAqWW4
+almost: vGiRa-v5mBs
+seeingspace: P5TANBxeM6Q
+drawbotic: WVHBg9eu0zHg
 ---
+
+<br>
+
+{% include youtubePlayer.html id=page.seeingspace %}
+
+<br>
+
+
 
 <p>
 The project's tiltle is Visualizing Real-Time Data and Performance Metrics in KUKA Robot Experimentation.
@@ -26,6 +41,8 @@ The project is guided by six main topics that direct its development process. Th
 </p> 
 
 <br>
+
+
 
 ### Project Environment
 
@@ -66,8 +83,9 @@ structure, Node-RED dashboard visualization, camera system, and video playback.
 
 <br>
 
-![Description](/assets/images/projects/seeingspace/result.png)
+<img src="/assets/images/projects/seeingspace/result.jpg" alt="Description" style="width:100%; height:auto;">
 <center><h2>The visualizing performance experiment results</h2></center>
 
 <br>
+
 
