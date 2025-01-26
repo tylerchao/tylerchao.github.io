@@ -15,9 +15,17 @@ project:
 
 
 
-drawbotic: VHBg9eu0zHg
+simulation: VHBg9eu0zHg
+drawbotic: vSv_xWQIiXI
+
 ---
 
+
+<br>
+
+{% include youtubePlayer.html id=page.simulation %}
+
+<br>
 
 <br>
 
@@ -241,6 +249,9 @@ To verify our understanding, we conducted experimental testing as a necessary st
 As expected, the differences between the two testing versions were noticeable and distinguishable. The robot arm with the default rounding accuracy value moved considerably slower. When it reached one target, it would stop momentarily before proceeding to the next target. In contrast, the robot in the second version exhibited prompt and compact motion, moving smoothly from one target to the next.
 
 <br>
+
+
+
 
 ### Model a tool
 
