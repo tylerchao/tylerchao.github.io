@@ -1,18 +1,13 @@
 # User config
-author: "Chien-Hsun (Tyler), Chao"
-tagline: "Chien-Hsun's Portfolio"
-description: "Hi, I’m Chien-Hsun, but you can also call me Tyler. I am passionate about robotics and technology innovation, especially humanoid robots. 
-              I hold a Master’s degree in IT Engineering from Fachhochschule Wedel, Germany (2023), and a Bachelor’s degree in Automatic Control Engineering with a focus on Biomedical Engineering from Feng Chia University, Taiwan.
-
-              During my academic journey, I have worked on diverse technical projects spanning embedded systems, IT projects, and robotics. These projects allowed me to master various programming languages and 
-              tools, including MQTT, IoT communication systems, Python, Java, Embedded C, AutoCAD, MATLAB, RoboDK, and Kuka industrial robots and microcontrollers.
-
-              Currently, I am exploring advanced robotics concepts by self-learning Robot Operating System 2 (ROS2) and developing a project that integrates gesture recognition with a camera system. 
-              This project will be using Python, and C++ as the main programming language. My ultimate goal is to contribute to the development of humanoid robots that bring significant benefits to humanity"
-keywords: "Keywords"
+author: "KO-YANG (Tyler), Chao"
+tagline: "KO-YANG's Portfolio"
+description: "Hi, I'm Tyler Chao — a robotics and technology enthusiast with a Master's in IT Engineering from Fachhochschule Wedel, Germany, 
+              and a Bachelor's in Automatic Control Engineering from Feng Chia University, Taiwan.
+              I've worked across embedded systems, IoT, and industrial robotics, 
+              with hands-on experience in Python, Java, Embedded C, MQTT, RoboDK, and KUKA robots — always driven by a passion for building technology that makes a real impact."
 email: "tylerchao2005@gmail.com"
 resume: "https://drive.google.com/file/d/1d5dZAET6dd1LrJdmsG8yxI6ijcyw-9fw/view?usp=drive_link"
-linkedin: "https://www.linkedin.com/in/chien-hsun-chao-49b574216/"
+linkedin: "linkedin.com/in/ko-yang-chao-49b574216"
 github: "https://github.com/tylerchao"
 
 
