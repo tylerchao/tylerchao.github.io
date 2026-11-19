@@ -51,7 +51,15 @@
   .lesson .meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:2px}
   .mini-bar{height:4px;background:var(--track);border-radius:4px;margin-top:6px;overflow:hidden}
   .mini-bar i{display:block;height:100%;background:var(--ok);width:0}
-  .add-btn{width:100%;margin-top:8px}
+  .add-btn{width:100%;margin-top:8px;font-size:13px}
+  .group{margin-bottom:4px}
+  .group-h{display:flex;align-items:center;gap:8px;width:100%;background:none;border:none;padding:8px 6px;font:inherit;font-weight:700;color:var(--ink);cursor:pointer;border-radius:8px;text-align:left}
+  .group-h:hover{background:var(--hover)}
+  .chev{width:12px;color:var(--muted);font-size:12px}
+  .g-name{flex:1}
+  .g-count{font-size:12px;font-weight:500;color:var(--muted)}
+  .group-b{padding:2px 0 8px 8px}
+  .empty-note{font-size:12px;color:var(--muted);padding:4px 6px}
   main .card{padding:24px}
   .top-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
   .lesson-title{font-size:20px;font-weight:700;margin:0}
@@ -148,8 +156,6 @@
     <div class="card">
       <div class="side-title">課程</div>
       <div id="lessonList"></div>
-      <button class="btn add-btn" id="addBtn">＋ 貼上自己的德文</button>
-      <button class="btn add-btn" id="addVideoBtn">▶ 加入 YouTube 影片</button>
     </div>
   </aside>
 
@@ -263,6 +269,17 @@
   </div>
 </div>
 
+<div class="modal-bg" id="umodal">
+  <div class="modal">
+    <h3>⭐ Pro 會員功能</h3>
+    <p id="uText"></p>
+    <div class="row">
+      <button class="btn" id="uClose">知道了</button>
+      <button class="btn primary" id="uLogin">登入</button>
+    </div>
+  </div>
+</div>
+
 <div class="modal-bg" id="vmodal">
   <div class="modal">
     <h3>加入 YouTube 影片</h3>
@@ -276,6 +293,7 @@
     <div class="hint">也可以直接把字幕內容貼在下面</div>
     <textarea id="vSubs" placeholder="1&#10;00:00:01,000 --> 00:00:03,500&#10;Hallo und willkommen!"></textarea>
     <label class="check"><input type="checkbox" id="vMerge" checked> 把斷開的字幕合併成完整句子</label>
+    <label class="check" id="vPublicWrap" style="display:none"><input type="checkbox" id="vPublic"> 發布為免費影片（所有人都能練習，管理員限定）</label>
     <div class="err" id="vErr"></div>
     <div class="row">
       <button class="btn" id="vCancel">取消</button>
@@ -284,41 +302,10 @@
   </div>
 </div>
 
+<script src="lessons.js"></script>
 <script>
-const BUILTIN = [
-  { id:"cafe", title:"Im Café", level:"A2", sentences:[
-    ["Ich hätte gern einen Kaffee mit Milch.","我想要一杯加牛奶的咖啡。"],
-    ["Möchten Sie auch etwas essen?","您也想吃點東西嗎？"],
-    ["Ja, ein Stück Apfelkuchen, bitte.","好，請給我一塊蘋果蛋糕。"],
-    ["Zum Mitnehmen oder zum Hieressen?","外帶還是內用？"],
-    ["Ich esse hier, danke.","我在這裡吃，謝謝。"],
-    ["Das macht zusammen sieben Euro fünfzig.","總共七歐元五十分。"]
-  ]},
-  { id:"bahn", title:"Mit der Bahn", level:"A2–B1", sentences:[
-    ["Der Zug nach Hamburg hat zwanzig Minuten Verspätung.","往漢堡的火車誤點二十分鐘。"],
-    ["Entschuldigung, von welchem Gleis fährt der Zug ab?","不好意思，火車從哪個月台出發？"],
-    ["Sie müssen in Hannover umsteigen.","您必須在漢諾威轉車。"],
-    ["Ich habe meine Fahrkarte online gekauft.","我在網路上買了車票。"],
-    ["Leider ist der Anschlusszug schon weg.","可惜轉乘的火車已經開走了。"],
-    ["Der nächste Zug kommt in einer Stunde.","下一班火車一小時後到。"]
-  ]},
-  { id:"arbeit", title:"Bei der Arbeit", level:"B1", sentences:[
-    ["Können wir das Meeting auf morgen verschieben?","我們可以把會議延到明天嗎？"],
-    ["Ich schicke Ihnen die Unterlagen per E-Mail.","我會用電子郵件把資料寄給您。"],
-    ["Der Roboter hat heute Morgen einen Fehler gemeldet.","機器人今天早上回報了一個錯誤。"],
-    ["Wir müssen die Software noch einmal testen.","我們必須再測試一次軟體。"],
-    ["Bis Freitag sollte alles fertig sein.","星期五之前應該全部完成。"],
-    ["Vielen Dank für Ihre Geduld.","非常感謝您的耐心。"]
-  ]},
-  { id:"wochenende", title:"Am Wochenende", level:"B1", sentences:[
-    ["Am Samstag bin ich mit Freunden wandern gegangen.","星期六我和朋友去健行了。"],
-    ["Das Wetter war besser, als wir erwartet hatten.","天氣比我們預期的好。"],
-    ["Unterwegs haben wir in einer kleinen Hütte gegessen.","路上我們在一間小木屋吃了飯。"],
-    ["Abends war ich so müde, dass ich sofort eingeschlafen bin.","晚上我累到馬上就睡著了。"],
-    ["Nächstes Wochenende will ich zu Hause bleiben.","下個週末我想待在家。"],
-    ["Vielleicht lese ich endlich das Buch, das du mir empfohlen hast.","也許我終於會讀你推薦給我的那本書。"]
-  ]}
-];
+const LEVELS = ["A1","A2","B1","B2","C1","C2"];
+const BUILTIN = (window.GP_LEVELS || []).flatMap(g => g.topics.map(t => ({ ...t, level: g.level })));
 
 // ---------- storage (best effort) ----------
 const store = {
@@ -327,7 +314,21 @@ const store = {
 };
 let custom = store.get("gp-custom", []);
 let progress = store.get("gp-progress", {});
-const lessons = () => BUILTIN.concat(custom);
+let publicVideos = store.get("gp-public", []);
+let isPro = false, isAdmin = false;
+const canPro = () => isPro || isAdmin;
+const lessons = () => BUILTIN.concat(publicVideos, custom);
+function setPublicLessons(list){
+  const cur = (lessons()[L] || {}).id;
+  publicVideos = list; store.set("gp-public", list);
+  const ni = lessons().findIndex(x => x.id === cur);
+  if (ni >= 0) L = ni;
+  renderList();
+}
+function refreshPlanUI(){
+  $("vPublicWrap").style.display = isAdmin ? "" : "none";
+  renderList();
+}
 let syncHook = () => {};   // replaced by the Firebase module when signed in
 function applyCloud(cloudProgress, cloudLessons){
   // progress: union of completed sentence indexes
@@ -500,22 +501,63 @@ function markDone(id, i, perfect){
   if (perfect){ const k = id + "-perfect"; const p = progress[k] || []; if(!p.includes(i)) p.push(i); progress[k] = p; store.set("gp-progress", progress); }
 }
 
+let openState = store.get("gp-open", {});   // kept in memory so it works without storage
 function renderList(){
   const all = lessons();
-  $("lessonList").innerHTML = all.map((l, i) => {
-    const d = lessonDone(l.id).length, n = l.sentences.length;
-    const del = l.custom ? `<button class="del" data-del="${i}">刪除</button>` : "";
-    return `<button class="lesson ${i===L?"active":""}" data-i="${i}">
-      <div class="name">${esc(l.title)}</div>
-      <div class="meta"><span>${esc(l.level)}</span><span>${d}/${n} ${del}</span></div>
-      <div class="mini-bar"><i style="width:${n?d/n*100:0}%"></i></div></button>`;
+  const open = openState;
+  const groups = LEVELS.map(lv => ({ key: lv, label: lv, items: [] }));
+  groups.push({ key: "video", label: "🎬 免費影片", items: [] }, { key: "mine", label: "⭐ 我的課程", items: [], mine: true });
+  const byKey = k => groups.find(g => g.key === k);
+  all.forEach((l, i) => {
+    const g = l.public ? byKey("video") : l.custom ? byKey("mine") : (byKey(l.level) || byKey("A1"));
+    g.items.push([l, i]);
+  });
+  const lock = canPro() ? "" : " 🔒";
+  $("lessonList").innerHTML = groups.map(g => {
+    if (g.key === "video" && !g.items.length) return "";
+    const isOpen = open[g.key] ?? (g.items.some(([, i]) => i === L) || g.mine);
+    const done = g.items.reduce((a, [l]) => a + lessonDone(l.id).length, 0);
+    const total = g.items.reduce((a, [l]) => a + l.sentences.length, 0);
+    const items = g.items.map(([l, i]) => {
+      const d = lessonDone(l.id).length, n = l.sentences.length;
+      const canDel = l.custom || (l.public && isAdmin);
+      const del = canDel ? `<span class="del" data-del="${i}">刪除</span>` : "";
+      return `<button class="lesson ${i===L?"active":""}" data-i="${i}">
+        <div class="name">${esc(l.title)}</div>
+        <div class="meta"><span>${esc(l.zh || (l.type === "video" ? "影片" : l.level))}</span><span>${d}/${n} ${del}</span></div>
+        <div class="mini-bar"><i style="width:${n?d/n*100:0}%"></i></div></button>`;
+    }).join("");
+    const adds = g.mine ? `
+      ${g.items.length ? "" : `<div class="empty-note">Pro 會員可以建立自己的文字和影片課程</div>`}
+      <button class="btn add-btn" data-act="text">＋ 貼上自己的德文${lock}</button>
+      <button class="btn add-btn" data-act="video">▶ 加入 YouTube 影片${lock}</button>` : "";
+    return `<div class="group">
+      <button class="group-h" data-g="${g.key}" data-open="${isOpen?1:0}">
+        <span class="chev">${isOpen ? "▾" : "▸"}</span><span class="g-name">${g.label}</span>
+        ${total ? `<span class="g-count">${done}/${total}</span>` : ""}
+      </button>
+      ${isOpen ? `<div class="group-b">${items}${adds}</div>` : ""}
+    </div>`;
   }).join("");
 }
 $("lessonList").onclick = e => {
+  const gh = e.target.closest(".group-h");
+  if (gh){
+    openState[gh.dataset.g] = gh.dataset.open !== "1";
+    store.set("gp-open", openState); renderList(); return;
+  }
+  const act = e.target.closest("[data-act]");
+  if (act){
+    if (!canPro()) { openUpgrade(); return; }
+    if (act.dataset.act === "text") { $("modal").classList.add("show"); $("customTitle").focus(); }
+    else { $("vErr").textContent = ""; $("vmodal").classList.add("show"); $("vUrl").focus(); }
+    return;
+  }
   const del = e.target.closest("[data-del]");
   if (del){
     e.stopPropagation();
     const l = lessons()[+del.dataset.del];
+    if (l.public) { syncHook("deletePublic", l.id); return; }
     custom = custom.filter(c => c.id !== l.id); store.set("gp-custom", custom); syncHook("delete", l.id);
     if (L >= lessons().length) L = 0; openLesson(L); return;
   }
@@ -523,13 +565,23 @@ $("lessonList").onclick = e => {
   openLesson(+b.dataset.i);
 };
 
+function openUpgrade(){
+  const signedIn = $("authBtn").textContent.startsWith("👤");
+  $("uText").textContent = signedIn
+    ? "「貼上自己的德文」和「加入 YouTube 影片」是 Pro 會員功能。付費方案即將推出，現在可以先免費練習 A1 到 C2 的課程和免費影片。"
+    : "「貼上自己的德文」和「加入 YouTube 影片」是 Pro 會員功能，請先登入帳號。";
+  $("uLogin").style.display = signedIn ? "none" : "";
+  $("umodal").classList.add("show");
+}
+
 function openLesson(i, startAt){
   L = i;
   const l = lessons()[L];
   const done = lessonDone(l.id);
   S = startAt != null ? startAt : (() => { for (let k=0;k<l.sentences.length;k++) if(!done.includes(k)) return k; return 0; })();
   $("practice").style.display = ""; $("summary").style.display = "none";
-  $("lessonTitle").textContent = l.title;
+  $("lessonTitle").textContent = l.zh ? `${l.title} · ${l.zh}` : l.title;
+  store.set("gp-last", l.id);
   if (l.type === "video") ensureVideo(l.videoId); else hideVideo();
   renderList(); openSentence();
 }
@@ -675,7 +727,6 @@ $("nextBtn").onclick = next;
 $("prevBtn").onclick = prev;
 
 // custom lessons
-$("addBtn").onclick = () => { $("modal").classList.add("show"); $("customTitle").focus(); };
 $("cancelCustom").onclick = () => $("modal").classList.remove("show");
 $("saveCustom").onclick = () => {
   const text = $("customText").value.replace(/\s+/g, " ").trim();
@@ -692,7 +743,6 @@ $("saveCustom").onclick = () => {
 
 // video lessons
 $("ccBtn").onclick = () => { const on = $("ccBtn").classList.toggle("on"); $("ccCover").style.display = on ? "" : "none"; };
-$("addVideoBtn").onclick = () => { $("vErr").textContent = ""; $("vmodal").classList.add("show"); $("vUrl").focus(); };
 $("vCancel").onclick = () => $("vmodal").classList.remove("show");
 $("vFile").onchange = () => {
   const f = $("vFile").files[0]; if (!f) return;
@@ -706,9 +756,17 @@ $("vSave").onclick = () => {
   let cues = parseSubs($("vSubs").value);
   if (!cues.length){ $("vErr").textContent = "字幕裡找不到時間軸，請確認是 .srt 或 .vtt 格式。"; return; }
   if ($("vMerge").checked) cues = mergeCues(cues);
-  custom.push({ id:"v" + Date.now(), title: $("vTitle").value.trim() || "YouTube 影片", level:"影片", custom:true, type:"video", videoId:id,
-    sentences: cues.map(c => [c.text, "", c.start, c.end]) });
-  store.set("gp-custom", custom); syncHook("lesson", custom[custom.length-1]);
+  const lesson = { id:"v" + Date.now(), title: $("vTitle").value.trim() || "YouTube 影片", level:"影片", type:"video", videoId:id,
+    sentences: cues.map(c => [c.text, "", c.start, c.end]) };
+  if (isAdmin && $("vPublic").checked){
+    syncHook("public", lesson);
+    $("vmodal").classList.remove("show"); $("vPublic").checked = false;
+    $("vUrl").value = ""; $("vTitle").value = ""; $("vSubs").value = ""; $("vFile").value = "";
+    return;
+  }
+  lesson.custom = true;
+  custom.push(lesson);
+  store.set("gp-custom", custom); syncHook("lesson", lesson);
   $("vUrl").value = ""; $("vTitle").value = ""; $("vSubs").value = ""; $("vFile").value = "";
   $("vmodal").classList.remove("show");
   openLesson(lessons().length - 1, 0);
@@ -717,6 +775,8 @@ $("vSave").onclick = () => {
 // auth modal (open/close only; sign-in logic lives in the Firebase module)
 $("authBtn").onclick = () => { $("aErr").textContent = ""; $("amodal").classList.add("show"); };
 $("aCancel").onclick = $("aClose").onclick = () => $("amodal").classList.remove("show");
+$("uClose").onclick = () => $("umodal").classList.remove("show");
+$("uLogin").onclick = () => { $("umodal").classList.remove("show"); $("authBtn").click(); };
 
 // ---------- theme ----------
 (function(){
@@ -734,7 +794,7 @@ $("aCancel").onclick = $("aClose").onclick = () => $("amodal").classList.remove(
   };
 })();
 
-openLesson(0);
+(() => { const last = store.get("gp-last", null); const i = lessons().findIndex(x => x.id === last); openLesson(i >= 0 ? i : 0); })();
 </script>
 
 <script type="module">
@@ -823,6 +883,21 @@ function saveProgressSoon(){
     F.setDoc(userRef(), { progress, email: user.email || null, updatedAt: F.serverTimestamp() }, { merge: true })), 800);
 }
 
+async function loadPlan(){
+  isPro = false; isAdmin = false;
+  try { const e = await F.getDoc(F.doc(db, "entitlements", user.uid)); isPro = e.exists() && e.data().pro === true; } catch (e) {}
+  try { const a = await F.getDoc(F.doc(db, "admins", user.uid)); isAdmin = a.exists(); } catch (e) {}
+  refreshPlanUI();
+}
+async function loadPublic(){
+  try {
+    const ls = await F.getDocs(F.collection(db, "publicLessons"));
+    const list = ls.docs.map(d => d.data()).sort((a, b) => (a.createdAt || 0) - (b.createdAt || 0))
+      .map(d => ({ ...fromCloud(d), custom: false, public: true }));
+    setPublicLessons(list);
+  } catch (e) { console.error(e); }
+}
+
 async function pullAndMerge(){
   await guarded(async () => {
     const snap = await F.getDoc(userRef());
@@ -830,7 +905,7 @@ async function pullAndMerge(){
     const ls = await F.getDocs(F.collection(db, "users", user.uid, "lessons"));
     const cloudLessons = ls.docs.map(d => fromCloud(d.data()));
     const localOnly = applyCloud(cloudProgress, cloudLessons);
-    await Promise.all(localOnly.map(l => F.setDoc(lessonRef(l.id), toCloud(l))));
+    if (canPro()) await Promise.all(localOnly.map(l => F.setDoc(lessonRef(l.id), toCloud(l))));
     await F.setDoc(userRef(), { progress, email: user.email || null, updatedAt: F.serverTimestamp() }, { merge: true });
   });
 }
@@ -838,12 +913,15 @@ async function pullAndMerge(){
 function hook(kind, arg){
   if (!user) return;
   if (kind === "progress") saveProgressSoon();
-  else if (kind === "lesson") guarded(() => F.setDoc(lessonRef(arg.id), toCloud(arg)));
+  else if (kind === "lesson") { if (canPro()) guarded(() => F.setDoc(lessonRef(arg.id), toCloud(arg))); }
   else if (kind === "delete") guarded(() => F.deleteDoc(lessonRef(arg)));
+  else if (kind === "public") guarded(async () => { await F.setDoc(F.doc(db, "publicLessons", arg.id), toCloud(arg)); await loadPublic(); });
+  else if (kind === "deletePublic") guarded(async () => { await F.deleteDoc(F.doc(db, "publicLessons", arg)); await loadPublic(); });
 }
 
 // ---------- auth UI ----------
 if (auth) {
+  loadPublic();
   el("aSwitch").onclick = () => setMode(mode === "login" ? "register" : "login");
   el("aGoogle").onclick = async () => {
     const provider = new A.GoogleAuthProvider();
@@ -888,9 +966,12 @@ if (auth) {
       el("aGuest").style.display = "none"; el("aUser").style.display = "";
       el("aInfo").textContent = `${u.email || ""}${u.providerData[0]?.providerId === "google.com" ? "（Google 帳號）" : ""}`;
       syncHook = hook;
+      await loadPlan();
+      el("aInfo").textContent += `　方案：${isAdmin ? "管理員" : isPro ? "Pro" : "免費"}`;
       await pullAndMerge();
     } else {
       syncHook = () => {};
+      isPro = false; isAdmin = false; refreshPlanUI();
       authBtn.textContent = "登入";
       syncState.textContent = "";
       el("aGuest").style.display = ""; el("aUser").style.display = "none";
