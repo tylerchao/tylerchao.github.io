@@ -114,6 +114,16 @@
   .modal input::placeholder,.modal textarea::placeholder{color:var(--placeholder)}
   .modal textarea{min-height:160px;resize:vertical}
   .modal .row{display:flex;justify-content:flex-end;gap:8px}
+  .video-wrap{position:relative;aspect-ratio:16/9;width:100%;border-radius:12px;overflow:hidden;background:#000;margin-bottom:12px}
+  .video-wrap iframe,.video-wrap #ytPlayer{position:absolute;inset:0;width:100%;height:100%;border:0}
+  .cc-cover{position:absolute;left:0;right:0;bottom:11%;height:19%;background:rgba(0,0,0,.92);pointer-events:none;display:flex;align-items:center;justify-content:center;color:#777;font-size:12px}
+  .video-tools{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:18px;font-size:12px;color:var(--muted)}
+  .modal label{display:block;font-size:13px;font-weight:600;margin:4px 0 6px}
+  .modal .hint{font-size:12px;color:var(--muted);margin:-4px 0 10px}
+  .modal input[type=checkbox]{width:auto;margin:0}
+  .modal input[type=file]{padding:8px}
+  .check{display:flex;gap:8px;align-items:center;font-size:13px;margin-bottom:12px}
+  .err{color:var(--bad);font-size:13px;min-height:18px;margin-bottom:6px}
   .del{font-size:11px;color:var(--bad);background:none;border:none;cursor:pointer;padding:0}
 </style>
 </head>
@@ -129,6 +139,7 @@
       <div class="side-title">課程</div>
       <div id="lessonList"></div>
       <button class="btn add-btn" id="addBtn">＋ 貼上自己的德文</button>
+      <button class="btn add-btn" id="addVideoBtn">▶ 加入 YouTube 影片</button>
     </div>
   </aside>
 
@@ -140,6 +151,10 @@
         <div class="counter" id="counter"></div>
       </div>
       <div class="progress"><i id="progBar"></i></div>
+      <div id="videoArea" style="display:none">
+        <div class="video-wrap"><div id="ytPlayer"></div><div class="cc-cover" id="ccCover">字幕遮罩</div></div>
+        <div class="video-tools"><button class="chip on" id="ccBtn">遮住字幕</button><span>按 ▶ 或 Enter 只播放這一句，播完會自動暫停</span></div>
+      </div>
 
       <div class="player">
         <button class="play" id="playBtn" title="播放 (Enter)">▶</button>
@@ -198,6 +213,27 @@
     <div class="row">
       <button class="btn" id="cancelCustom">取消</button>
       <button class="btn primary" id="saveCustom">建立課程</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-bg" id="vmodal">
+  <div class="modal">
+    <h3>加入 YouTube 影片</h3>
+    <p>貼上影片網址，再上傳這支影片的德文字幕檔（.srt 或 .vtt），會依字幕時間軸切成一句一句。</p>
+    <label>影片網址</label>
+    <input id="vUrl" placeholder="https://www.youtube.com/watch?v=...">
+    <label>課程名稱</label>
+    <input id="vTitle" placeholder="例如：Easy German - Im Supermarkt">
+    <label>字幕檔</label>
+    <input type="file" id="vFile" accept=".srt,.vtt,.txt">
+    <div class="hint">也可以直接把字幕內容貼在下面</div>
+    <textarea id="vSubs" placeholder="1&#10;00:00:01,000 --> 00:00:03,500&#10;Hallo und willkommen!"></textarea>
+    <label class="check"><input type="checkbox" id="vMerge" checked> 把斷開的字幕合併成完整句子</label>
+    <div class="err" id="vErr"></div>
+    <div class="row">
+      <button class="btn" id="vCancel">取消</button>
+      <button class="btn primary" id="vSave">建立影片課程</button>
     </div>
   </div>
 </div>
@@ -293,6 +329,102 @@ function speak(text, r){
   }catch(e){}
 }
 
+// ---------- YouTube ----------
+let ytReady = false, ytPlayer = null, ytPending = null, ytCurrent = null, segTimer = null;
+function loadYT(){
+  if (document.getElementById("yt-api")) return;
+  const sc = document.createElement("script"); sc.id = "yt-api"; sc.src = "https://www.youtube.com/iframe_api";
+  document.head.appendChild(sc);
+}
+window.onYouTubeIframeAPIReady = () => { ytReady = true; if (ytPending) { createPlayer(ytPending); ytPending = null; } };
+function createPlayer(id){
+  ytCurrent = id;
+  ytPlayer = new YT.Player("ytPlayer", { videoId:id, playerVars:{ rel:0, playsinline:1, iv_load_policy:3, modestbranding:1 } });
+}
+function ensureVideo(id){
+  $("videoArea").style.display = "";
+  if (!ytReady){ ytPending = id; loadYT(); return; }
+  if (!ytPlayer) createPlayer(id);
+  else if (ytCurrent !== id){ ytCurrent = id; try{ ytPlayer.cueVideoById(id); }catch(e){} }
+}
+function hideVideo(){
+  $("videoArea").style.display = "none";
+  clearInterval(segTimer);
+  try{ ytPlayer && ytPlayer.pauseVideo(); }catch(e){}
+}
+function nearestRate(r){
+  const rates = [0.25,0.5,0.75,1,1.25];
+  return rates.reduce((a,b) => Math.abs(b-r) < Math.abs(a-r) ? b : a);
+}
+function playSegment(start, end, r){
+  if (!ytPlayer || !ytPlayer.seekTo) return;
+  clearInterval(segTimer);
+  try{
+    ytPlayer.setPlaybackRate(nearestRate(r));
+    ytPlayer.seekTo(Math.max(0, start - 0.05), true);
+    ytPlayer.playVideo();
+  }catch(e){ return; }
+  const stopAt = end + 0.2;
+  segTimer = setInterval(() => {
+    try{
+      if (ytPlayer.getCurrentTime() >= stopAt){ ytPlayer.pauseVideo(); clearInterval(segTimer); }
+    }catch(e){ clearInterval(segTimer); }
+  }, 80);
+}
+function playCurrent(r){
+  const l = lessons()[L];
+  if (l.type === "video"){ const s = l.sentences[S]; playSegment(s[2], s[3], r || rate); }
+  else speak(sess.de, r);
+}
+
+// ---------- subtitles ----------
+function parseTime(t){
+  const parts = t.trim().replace(",", ".").split(":").map(Number);
+  return parts.reduce((a,p) => a*60 + p, 0);
+}
+function parseSubs(text){
+  const out = [];
+  text.replace(/\r/g, "").split(/\n\s*\n/).forEach(block => {
+    const lines = block.split("\n").map(x => x.trim()).filter(Boolean);
+    const i = lines.findIndex(x => x.includes("-->"));
+    if (i < 0) return;
+    const [a, b] = lines[i].split("-->");
+    const start = parseTime(a), end = parseTime(b.trim().split(/\s+/)[0]);
+    let txt = lines.slice(i+1).join(" ")
+      .replace(/<[^>]+>/g, "").replace(/\{[^}]*\}/g, "")
+      .replace(/\[[^\]]*\]|\([^)]*\)/g, "")
+      .replace(/&nbsp;/g, " ").replace(/&amp;/g, "&").replace(/^[-–]\s*/, "")
+      .replace(/\s+/g, " ").trim();
+    if (isNaN(start) || isNaN(end) || !tokenize(txt).length) return;
+    const last = out[out.length-1];
+    if (last && last.text === txt){ last.end = end; return; }
+    out.push({ start, end, text: txt });
+  });
+  return out;
+}
+function mergeCues(cues){
+  const out = []; let cur = null;
+  cues.forEach(c => {
+    if (cur && c.start - cur.end > 1.5){ out.push(cur); cur = null; }
+    if (!cur) cur = { ...c }; else { cur.text += " " + c.text; cur.end = c.end; }
+    if (/[.!?…]["»«“”']?$/.test(cur.text) || cur.end - cur.start > 12 || tokenize(cur.text).length > 22){ out.push(cur); cur = null; }
+  });
+  if (cur) out.push(cur);
+  return out;
+}
+function parseYouTubeId(u){
+  u = u.trim();
+  if (/^[\w-]{11}$/.test(u)) return u;
+  try{
+    const x = new URL(u);
+    if (x.hostname.includes("youtu.be")) return x.pathname.slice(1, 12);
+    if (x.searchParams.get("v")) return x.searchParams.get("v");
+    const m = x.pathname.match(/\/(embed|shorts|live)\/([\w-]{11})/);
+    if (m) return m[2];
+  }catch(e){}
+  return null;
+}
+
 // ---------- state ----------
 let L = 0, S = 0;
 let sess = null; // per-sentence session
@@ -337,6 +469,7 @@ function openLesson(i, startAt){
   S = startAt != null ? startAt : (() => { for (let k=0;k<l.sentences.length;k++) if(!done.includes(k)) return k; return 0; })();
   $("practice").style.display = ""; $("summary").style.display = "none";
   $("lessonTitle").textContent = l.title;
+  if (l.type === "video") ensureVideo(l.videoId); else hideVideo();
   renderList(); openSentence();
 }
 
@@ -399,7 +532,7 @@ function complete(){
 
 function next(){
   const l = lessons()[L];
-  if (S < l.sentences.length - 1){ S++; openSentence(); speak(sess.de); }
+  if (S < l.sentences.length - 1){ S++; openSentence(); playCurrent(); }
   else showSummary();
 }
 function prev(){ if (S > 0){ S--; openSentence(); } }
@@ -439,18 +572,18 @@ function showSummary(){
 }
 
 // ---------- events ----------
-$("playBtn").onclick = () => { sess.replays++; speak(sess.de); render(); answer.focus(); };
+$("playBtn").onclick = () => { sess.replays++; playCurrent(); render(); answer.focus(); };
 $("speeds").onclick = e => {
   const b = e.target.closest(".chip"); if (!b) return;
   rate = +b.dataset.rate;
   document.querySelectorAll("#speeds .chip").forEach(c => c.classList.toggle("on", c === b));
-  speak(sess.de); answer.focus();
+  playCurrent(); answer.focus();
 };
 answer.addEventListener("input", render);
 answer.addEventListener("keydown", e => {
   if (e.key === "Enter" && e.shiftKey){ e.preventDefault(); hint(); }
-  else if (e.key === "Enter"){ e.preventDefault(); if (sess.complete) next(); else { sess.replays++; speak(sess.de); render(); } }
-  else if (e.key === "Escape"){ e.preventDefault(); sess.replays++; speak(sess.de, 0.6); render(); }
+  else if (e.key === "Enter"){ e.preventDefault(); if (sess.complete) next(); else { sess.replays++; playCurrent(); render(); } }
+  else if (e.key === "Escape"){ e.preventDefault(); sess.replays++; playCurrent(0.6); render(); }
 });
 $("umlauts").onclick = e => {
   const b = e.target.closest("button"); if (!b) return;
@@ -478,6 +611,30 @@ $("saveCustom").onclick = () => {
   openLesson(lessons().length - 1, 0);
 };
 
+
+// video lessons
+$("ccBtn").onclick = () => { const on = $("ccBtn").classList.toggle("on"); $("ccCover").style.display = on ? "" : "none"; };
+$("addVideoBtn").onclick = () => { $("vErr").textContent = ""; $("vmodal").classList.add("show"); $("vUrl").focus(); };
+$("vCancel").onclick = () => $("vmodal").classList.remove("show");
+$("vFile").onchange = () => {
+  const f = $("vFile").files[0]; if (!f) return;
+  const rd = new FileReader();
+  rd.onload = () => { $("vSubs").value = rd.result; if (!$("vTitle").value) $("vTitle").value = f.name.replace(/\.(srt|vtt|txt)$/i, ""); };
+  rd.readAsText(f);
+};
+$("vSave").onclick = () => {
+  const id = parseYouTubeId($("vUrl").value);
+  if (!id){ $("vErr").textContent = "看不懂這個網址，請貼 YouTube 影片網址。"; return; }
+  let cues = parseSubs($("vSubs").value);
+  if (!cues.length){ $("vErr").textContent = "字幕裡找不到時間軸，請確認是 .srt 或 .vtt 格式。"; return; }
+  if ($("vMerge").checked) cues = mergeCues(cues);
+  custom.push({ id:"v" + Date.now(), title: $("vTitle").value.trim() || "YouTube 影片", level:"影片", custom:true, type:"video", videoId:id,
+    sentences: cues.map(c => [c.text, "", c.start, c.end]) });
+  store.set("gp-custom", custom);
+  $("vUrl").value = ""; $("vTitle").value = ""; $("vSubs").value = ""; $("vFile").value = "";
+  $("vmodal").classList.remove("show");
+  openLesson(lessons().length - 1, 0);
+};
 
 // ---------- theme ----------
 (function(){
