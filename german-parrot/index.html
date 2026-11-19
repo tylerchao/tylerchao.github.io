@@ -74,6 +74,8 @@
   .w.typing{color:var(--typing)}
   .w.typing .rest{color:var(--rest);letter-spacing:.12em}
   .w.extra{color:var(--bad);background:var(--bad-bg)}
+  .misses{margin:-6px 0 14px;font-size:13px;color:var(--muted);min-height:0}
+  .misses .w{margin-left:6px}
   .input-row{position:relative}
   input.answer{width:100%;font:inherit;font-size:18px;padding:14px 16px;border:2px solid var(--line);border-radius:12px;outline:none;background:var(--field);color:var(--ink);caret-color:var(--accent)}
   input.answer::placeholder{color:var(--placeholder)}
@@ -183,9 +185,10 @@
       </div>
 
       <div class="words" id="words"></div>
+      <div class="misses" id="misses"></div>
 
       <div class="input-row">
-        <input class="answer" id="answer" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="先按 ▶ 聽，再把聽到的句子打出來…">
+        <input class="answer" id="answer" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="先按 ▶ 聽，聽懂哪個字就打哪個字…">
       </div>
       <div class="umlauts" id="umlauts">
         <button>ä</button><button>ö</button><button>ü</button><button>ß</button><button>Ä</button><button>Ö</button><button>Ü</button>
@@ -204,6 +207,7 @@
         <span><kbd>Enter</kbd> 重播／完成後下一句</span>
         <span><kbd>Shift</kbd>+<kbd>Enter</kbd> 提示</span>
         <span><kbd>Esc</kbd> 慢速播放</span>
+        <span>順序不限，聽懂哪個字就打哪個字（用空白隔開）</span>
         <span>ä 可打 ae，ß 可打 ss；標點不用打</span>
       </div>
     </div>
@@ -533,7 +537,7 @@ function openLesson(i, startAt){
 function openSentence(){
   const l = lessons()[L];
   const [de, zh] = l.sentences[S];
-  sess = { de, zh, words: tokenize(de), replays:0, hints:0, errSet:new Set(), revealed:false, complete:false };
+  sess = { de, zh, words: tokenize(de), replays:0, hints:0, errSet:new Set(), revealed:false, complete:false, hinted:new Set() };
   answer.value = ""; answer.classList.remove("done"); answer.disabled = false;
   $("feedback").classList.remove("show");
   $("counter").textContent = `第 ${S+1} / ${l.sentences.length} 句 · ${l.level}`;
@@ -543,34 +547,53 @@ function openSentence(){
   render(); answer.focus();
 }
 
-function render(){
+// Words can be typed in any order. Each typed word is matched to a slot of
+// the sentence; matched slots reveal in place, the rest stay hidden.
+function computeStatus(){
   const raw = answer.value;
   const typed = tokenize(raw);
   const trailing = /[\s.,!?;:]$/.test(raw);
   const T = sess.words;
-  let html = "", allOk = typed.length === T.length;
-  T.forEach((w, i) => {
-    const t = typed[i];
-    if (t == null){ allOk = false; html += `<span class="w empty">${"_".repeat(w.length)}</span>`; return; }
-    const finalized = i < typed.length - 1 || trailing;
-    let st = judge(t, w);
-    if (st !== "ok" && !finalized && isPrefix(t, w)) st = "typing";
-    else if (st !== "ok" && !finalized && st === "case") st = "case";
-    if (st !== "ok") allOk = false;
-    if (finalized && st === "bad") sess.errSet.add(i + ":" + t);
-    if (st === "ok") html += `<span class="w ok">${esc(w)}</span>`;
-    else if (st === "case") html += `<span class="w case">${esc(t)}</span>`;
-    else if (st === "typing") {
-      const rest = Math.max(0, w.length - t.length);
-      html += `<span class="w typing">${esc(t)}<span class="rest">${"_".repeat(rest)}</span></span>`;
-    } else html += `<span class="w bad">${esc(t)}</span>`;
+  const status = new Array(T.length).fill(null);   // "ok" | {c: typedWord} | null
+  sess.hinted.forEach(i => { status[i] = "ok"; });
+  const used = new Array(typed.length).fill(false);
+  const fin = j => j < typed.length - 1 || trailing;
+
+  // pass 1: correct words (the word being typed counts once it is exactly right)
+  let last = -1;
+  typed.forEach((t, j) => {
+    const cands = [];
+    T.forEach((w, i) => { if (status[i] !== "ok" && judge(t, w) === "ok") cands.push(i); });
+    if (!cands.length) return;
+    const i = cands.find(k => k > last) ?? cands[0];   // prefer keeping the typed order
+    status[i] = "ok"; used[j] = true; last = i;
   });
-  for (let i = T.length; i < typed.length; i++){ allOk = false; html += `<span class="w extra">${esc(typed[i])}</span>`; }
-  $("words").innerHTML = html;
+  // pass 2: finished words that only differ in capitalization
+  typed.forEach((t, j) => {
+    if (used[j] || !fin(j)) return;
+    const i = T.findIndex((w, k) => status[k] == null && judge(t, w) === "case");
+    if (i >= 0) { status[i] = { c: t }; used[j] = true; return; }
+    if (T.some(w => judge(t, w) !== "bad")) used[j] = true;   // repeat of a word already revealed
+  });
+  const misses = typed.filter((t, j) => !used[j] && fin(j));
+  return { status, misses };
+}
+
+function render(){
+  const { status, misses } = computeStatus();
+  misses.forEach(t => sess.errSet.add(t.toLowerCase()));
+  $("words").innerHTML = sess.words.map((w, i) => {
+    const st = status[i];
+    if (st === "ok") return `<span class="w ok">${esc(w)}</span>`;
+    if (st && st.c) return `<span class="w case">${esc(st.c)}</span>`;
+    return `<span class="w empty">${"_".repeat(w.length)}</span>`;
+  }).join("");
+  $("misses").innerHTML = misses.length
+    ? `句子裡沒有：${misses.map(t => `<span class="w bad">${esc(t)}</span>`).join("")}` : "";
   $("sReplay").textContent = sess.replays;
   $("sHint").textContent = sess.hints;
   $("sErr").textContent = sess.errSet.size;
-  if (allOk && !sess.complete) complete();
+  if (status.every(x => x === "ok") && !sess.complete) complete();
 }
 
 function complete(){
@@ -596,18 +619,16 @@ function prev(){ if (S > 0){ S--; openSentence(); } }
 
 function hint(){
   if (sess.complete) return;
-  const typed = tokenize(answer.value), T = sess.words;
-  let i = 0;
-  while (i < T.length && typed[i] != null && judge(typed[i], T[i]) === "ok") i++;
-  if (i >= T.length) return;
-  sess.hints++;
-  answer.value = T.slice(0, i+1).join(" ") + (i+1 < T.length ? " " : "");
+  const { status } = computeStatus();
+  const i = status.findIndex(x => x !== "ok");
+  if (i < 0) return;
+  sess.hints++; sess.hinted.add(i);
   answer.focus(); render();
 }
 function reveal(){
   if (sess.complete) return;
   sess.revealed = true;
-  answer.value = sess.words.join(" ");
+  sess.words.forEach((_, i) => sess.hinted.add(i));
   render();
 }
 
