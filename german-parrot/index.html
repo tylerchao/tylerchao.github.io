@@ -124,13 +124,21 @@
   .modal input[type=file]{padding:8px}
   .check{display:flex;gap:8px;align-items:center;font-size:13px;margin-bottom:12px}
   .err{color:var(--bad);font-size:13px;min-height:18px;margin-bottom:6px}
+  .google{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;margin-bottom:12px}
+  .or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12px;margin:4px 0 12px}
+  .or::before,.or::after{content:"";flex:1;height:1px;background:var(--line)}
+  .link{background:none;border:none;padding:0;font:inherit;font-size:13px;color:var(--accent);cursor:pointer}
+  .link:hover{text-decoration:underline}
+  .auth-links{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .sync{font-size:12px;color:var(--muted)}
+  .ok-msg{color:var(--ok)}
   .del{font-size:11px;color:var(--bad);background:none;border:none;cursor:pointer;padding:0}
 </style>
 </head>
 <body>
 <header>
   <div class="brand"><div class="logo">🦜</div><div>German Parrot<small>德文逐句聽寫</small></div></div>
-  <div class="head-right"><div class="voice-wrap"><span>語音</span> <select id="voiceSel"></select></div><button class="theme-btn" id="themeBtn">🌙 夜間</button></div>
+  <div class="head-right"><div class="voice-wrap"><span>語音</span> <select id="voiceSel"></select></div><button class="theme-btn" id="themeBtn">🌙 夜間</button><span class="sync" id="syncState"></span><button class="theme-btn" id="authBtn">登入</button></div>
 </header>
 
 <div class="layout">
@@ -217,6 +225,40 @@
   </div>
 </div>
 
+<div class="modal-bg" id="amodal">
+  <div class="modal">
+    <div id="aGuest">
+      <h3 id="aTitle">登入 German Parrot</h3>
+      <p>登入後，練習進度和自己建立的課程會在不同裝置同步。</p>
+      <button class="btn google" id="aGoogle">
+        <svg width="18" height="18" viewBox="0 0 48 48"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-8l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 39.2 44 34 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>
+        用 Google 帳號繼續
+      </button>
+      <div class="or">或用 Email</div>
+      <input id="aName" placeholder="暱稱" style="display:none">
+      <input id="aEmail" type="email" placeholder="Email" autocomplete="email">
+      <input id="aPass" type="password" placeholder="密碼（至少 6 個字元）" autocomplete="current-password">
+      <div class="err" id="aErr"></div>
+      <div class="auth-links">
+        <button class="link" id="aSwitch">還沒有帳號？註冊</button>
+        <button class="link" id="aForgot">忘記密碼</button>
+      </div>
+      <div class="row">
+        <button class="btn" id="aCancel">取消</button>
+        <button class="btn primary" id="aSubmit">登入</button>
+      </div>
+    </div>
+    <div id="aUser" style="display:none">
+      <h3>我的帳號</h3>
+      <p id="aInfo"></p>
+      <div class="row">
+        <button class="btn" id="aLogout">登出</button>
+        <button class="btn primary" id="aClose">關閉</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="modal-bg" id="vmodal">
   <div class="modal">
     <h3>加入 YouTube 影片</h3>
@@ -282,6 +324,21 @@ const store = {
 let custom = store.get("gp-custom", []);
 let progress = store.get("gp-progress", {});
 const lessons = () => BUILTIN.concat(custom);
+let syncHook = () => {};   // replaced by the Firebase module when signed in
+function applyCloud(cloudProgress, cloudLessons){
+  // progress: union of completed sentence indexes
+  Object.keys(cloudProgress || {}).forEach(k => {
+    const set = new Set([...(progress[k] || []), ...(cloudProgress[k] || [])]);
+    progress[k] = [...set].sort((a,b) => a-b);
+  });
+  const localIds = new Set(custom.map(c => c.id));
+  const cloudIds = new Set(cloudLessons.map(c => c.id));
+  const localOnly = custom.filter(c => !cloudIds.has(c.id));
+  cloudLessons.forEach(c => { if (!localIds.has(c.id)) custom.push(c); });
+  store.set("gp-progress", progress); store.set("gp-custom", custom);
+  renderList();
+  return localOnly;
+}
 
 // ---------- text helpers ----------
 const WORD_RE = /[\p{L}\p{N}]+(?:[-'’][\p{L}\p{N}]+)*/gu;
@@ -435,7 +492,7 @@ function lessonDone(id){ return progress[id] || []; }
 function markDone(id, i, perfect){
   const arr = progress[id] || [];
   if (!arr.includes(i)) arr.push(i);
-  progress[id] = arr; store.set("gp-progress", progress);
+  progress[id] = arr; store.set("gp-progress", progress); syncHook("progress");
   if (perfect){ const k = id + "-perfect"; const p = progress[k] || []; if(!p.includes(i)) p.push(i); progress[k] = p; store.set("gp-progress", progress); }
 }
 
@@ -455,7 +512,7 @@ $("lessonList").onclick = e => {
   if (del){
     e.stopPropagation();
     const l = lessons()[+del.dataset.del];
-    custom = custom.filter(c => c.id !== l.id); store.set("gp-custom", custom);
+    custom = custom.filter(c => c.id !== l.id); store.set("gp-custom", custom); syncHook("delete", l.id);
     if (L >= lessons().length) L = 0; openLesson(L); return;
   }
   const b = e.target.closest(".lesson"); if (!b) return;
@@ -566,7 +623,7 @@ function showSummary(){
       <button class="btn" id="redo">重做這課</button>
       ${hasNext ? `<button class="btn primary" id="nextLesson">下一課 →</button>` : ""}
     </div>`;
-  $("redo").onclick = () => { progress[l.id] = []; progress[l.id+"-perfect"] = []; store.set("gp-progress", progress); openLesson(L, 0); };
+  $("redo").onclick = () => { progress[l.id] = []; progress[l.id+"-perfect"] = []; store.set("gp-progress", progress); syncHook("progress"); openLesson(L, 0); };
   if (hasNext) $("nextLesson").onclick = () => openLesson(L+1);
   $("progBar").style.width = "100%";
 }
@@ -605,7 +662,7 @@ $("saveCustom").onclick = () => {
   if (!parts.length){ $("customText").focus(); return; }
   const title = $("customTitle").value.trim() || "我的課程 " + (custom.length + 1);
   custom.push({ id:"c" + Date.now(), title, level:"自訂", custom:true, sentences: parts.map(p => [p, ""]) });
-  store.set("gp-custom", custom);
+  store.set("gp-custom", custom); syncHook("lesson", custom[custom.length-1]);
   $("customTitle").value = ""; $("customText").value = "";
   $("modal").classList.remove("show");
   openLesson(lessons().length - 1, 0);
@@ -630,11 +687,15 @@ $("vSave").onclick = () => {
   if ($("vMerge").checked) cues = mergeCues(cues);
   custom.push({ id:"v" + Date.now(), title: $("vTitle").value.trim() || "YouTube 影片", level:"影片", custom:true, type:"video", videoId:id,
     sentences: cues.map(c => [c.text, "", c.start, c.end]) });
-  store.set("gp-custom", custom);
+  store.set("gp-custom", custom); syncHook("lesson", custom[custom.length-1]);
   $("vUrl").value = ""; $("vTitle").value = ""; $("vSubs").value = ""; $("vFile").value = "";
   $("vmodal").classList.remove("show");
   openLesson(lessons().length - 1, 0);
 };
+
+// auth modal (open/close only; sign-in logic lives in the Firebase module)
+$("authBtn").onclick = () => { $("aErr").textContent = ""; $("amodal").classList.add("show"); };
+$("aCancel").onclick = $("aClose").onclick = () => $("amodal").classList.remove("show");
 
 // ---------- theme ----------
 (function(){
@@ -653,6 +714,169 @@ $("vSave").onclick = () => {
 })();
 
 openLesson(0);
+</script>
+
+<script type="module">
+const firebaseConfig = {
+  apiKey: "AIzaSyCgzDgiXQ0zZZh07vQVA8DAqmwIpqBvRpk",
+  authDomain: "german-parrot.firebaseapp.com",
+  projectId: "german-parrot",
+  storageBucket: "german-parrot.firebasestorage.app",
+  messagingSenderId: "1077852411685",
+  appId: "1:1077852411685:web:8755faed02e3588ace6ccc"
+};
+const V = "10.12.2", CDN = `https://www.gstatic.com/firebasejs/${V}`;
+const el = id => document.getElementById(id);
+const authBtn = el("authBtn"), syncState = el("syncState");
+
+let A, F, auth, db;
+try {
+  const [App, Auth, Fs] = await Promise.all([
+    import(`${CDN}/firebase-app.js`), import(`${CDN}/firebase-auth.js`), import(`${CDN}/firebase-firestore.js`)
+  ]);
+  A = Auth; F = Fs;
+  const app = App.initializeApp(firebaseConfig);
+  auth = A.getAuth(app); db = F.getFirestore(app);
+  A.setPersistence(auth, A.browserLocalPersistence).catch(() => {});
+} catch (e) {
+  authBtn.disabled = true;
+  authBtn.title = "帳號功能只能在正式網站 tylerchao.github.io 使用";
+  authBtn.textContent = "登入（離線）";
+}
+
+const ERR = {
+  "auth/email-already-in-use": "這個 Email 已經註冊過了，請直接登入。",
+  "auth/invalid-email": "Email 格式不對。",
+  "auth/weak-password": "密碼至少要 6 個字元。",
+  "auth/invalid-credential": "Email 或密碼錯誤。",
+  "auth/wrong-password": "Email 或密碼錯誤。",
+  "auth/user-not-found": "找不到這個帳號。",
+  "auth/too-many-requests": "嘗試太多次，請稍後再試。",
+  "auth/popup-closed-by-user": "登入視窗被關掉了。",
+  "auth/cancelled-popup-request": "登入視窗被關掉了。",
+  "auth/unauthorized-domain": "這個網域還沒加入 Firebase 的授權網域。",
+  "auth/network-request-failed": "網路連線失敗。",
+  "auth/operation-not-allowed": "這種登入方式還沒在 Firebase 啟用。"
+};
+const showErr = e => { el("aErr").classList.remove("ok-msg"); el("aErr").textContent = ERR[e.code] || ("發生錯誤：" + (e.code || e.message)); };
+const showOk = t => { el("aErr").classList.add("ok-msg"); el("aErr").textContent = t; };
+
+let mode = "login", user = null;
+function setMode(m){
+  mode = m;
+  el("aTitle").textContent = m === "login" ? "登入 German Parrot" : "註冊 German Parrot";
+  el("aSubmit").textContent = m === "login" ? "登入" : "註冊";
+  el("aSwitch").textContent = m === "login" ? "還沒有帳號？註冊" : "已經有帳號？登入";
+  el("aName").style.display = m === "login" ? "none" : "";
+  el("aPass").autocomplete = m === "login" ? "current-password" : "new-password";
+  el("aErr").textContent = "";
+}
+
+// ---------- cloud data ----------
+const toCloud = l => ({
+  id: l.id, title: l.title, level: l.level, type: l.type || "text", videoId: l.videoId || null, createdAt: Date.now(),
+  sentences: l.sentences.map(x => ({ de: x[0], zh: x[1] || "", s: x[2] ?? null, e: x[3] ?? null }))
+});
+const fromCloud = d => ({
+  id: d.id, title: d.title, level: d.level, custom: true,
+  ...(d.type === "video" ? { type: "video", videoId: d.videoId } : {}),
+  sentences: (d.sentences || []).map(x => x.s == null ? [x.de, x.zh || ""] : [x.de, x.zh || "", x.s, x.e])
+});
+const userRef = () => F.doc(db, "users", user.uid);
+const lessonRef = id => F.doc(db, "users", user.uid, "lessons", id);
+
+let pending = 0;
+function busy(delta){
+  pending += delta;
+  syncState.textContent = pending > 0 ? "同步中…" : "已同步 ✓";
+}
+async function guarded(fn){
+  busy(1);
+  try { await fn(); } catch (e) { console.error(e); syncState.textContent = "同步失敗"; pending = Math.max(0, pending-1); return; }
+  busy(-1);
+}
+let progTimer = null;
+function saveProgressSoon(){
+  clearTimeout(progTimer);
+  progTimer = setTimeout(() => guarded(() =>
+    F.setDoc(userRef(), { progress, email: user.email || null, updatedAt: F.serverTimestamp() }, { merge: true })), 800);
+}
+
+async function pullAndMerge(){
+  await guarded(async () => {
+    const snap = await F.getDoc(userRef());
+    const cloudProgress = snap.exists() ? (snap.data().progress || {}) : {};
+    const ls = await F.getDocs(F.collection(db, "users", user.uid, "lessons"));
+    const cloudLessons = ls.docs.map(d => fromCloud(d.data()));
+    const localOnly = applyCloud(cloudProgress, cloudLessons);
+    await Promise.all(localOnly.map(l => F.setDoc(lessonRef(l.id), toCloud(l))));
+    await F.setDoc(userRef(), { progress, email: user.email || null, updatedAt: F.serverTimestamp() }, { merge: true });
+  });
+}
+
+function hook(kind, arg){
+  if (!user) return;
+  if (kind === "progress") saveProgressSoon();
+  else if (kind === "lesson") guarded(() => F.setDoc(lessonRef(arg.id), toCloud(arg)));
+  else if (kind === "delete") guarded(() => F.deleteDoc(lessonRef(arg)));
+}
+
+// ---------- auth UI ----------
+if (auth) {
+  el("aSwitch").onclick = () => setMode(mode === "login" ? "register" : "login");
+  el("aGoogle").onclick = async () => {
+    const provider = new A.GoogleAuthProvider();
+    try { await A.signInWithPopup(auth, provider); el("amodal").classList.remove("show"); }
+    catch (e) {
+      if (e.code === "auth/popup-blocked") { try { await A.signInWithRedirect(auth, provider); } catch (e2) { showErr(e2); } }
+      else showErr(e);
+    }
+  };
+  el("aSubmit").onclick = async () => {
+    const email = el("aEmail").value.trim(), pass = el("aPass").value;
+    if (!email || !pass) { el("aErr").textContent = "請輸入 Email 和密碼。"; return; }
+    el("aSubmit").disabled = true;
+    try {
+      if (mode === "login") await A.signInWithEmailAndPassword(auth, email, pass);
+      else {
+        const cred = await A.createUserWithEmailAndPassword(auth, email, pass);
+        const name = el("aName").value.trim();
+        if (name) await A.updateProfile(cred.user, { displayName: name });
+        A.sendEmailVerification(cred.user).catch(() => {});
+      }
+      el("aPass").value = "";
+      el("amodal").classList.remove("show");
+    } catch (e) { showErr(e); }
+    el("aSubmit").disabled = false;
+  };
+  el("aPass").addEventListener("keydown", e => { if (e.key === "Enter") el("aSubmit").click(); });
+  el("aForgot").onclick = async () => {
+    const email = el("aEmail").value.trim();
+    if (!email) { el("aErr").textContent = "先在上面輸入你的 Email，再按「忘記密碼」。"; return; }
+    try { await A.sendPasswordResetEmail(auth, email); showOk("重設密碼的信已寄出，請查看信箱。"); }
+    catch (e) { showErr(e); }
+  };
+  el("aLogout").onclick = async () => { await A.signOut(auth); el("amodal").classList.remove("show"); };
+
+  A.getRedirectResult(auth).catch(() => {});
+  A.onAuthStateChanged(auth, async u => {
+    user = u;
+    if (u) {
+      const name = u.displayName || (u.email || "").split("@")[0];
+      authBtn.textContent = "👤 " + name;
+      el("aGuest").style.display = "none"; el("aUser").style.display = "";
+      el("aInfo").textContent = `${u.email || ""}${u.providerData[0]?.providerId === "google.com" ? "（Google 帳號）" : ""}`;
+      syncHook = hook;
+      await pullAndMerge();
+    } else {
+      syncHook = () => {};
+      authBtn.textContent = "登入";
+      syncState.textContent = "";
+      el("aGuest").style.display = ""; el("aUser").style.display = "none";
+      setMode("login");
+    }
+  });
+}
 </script>
 </body>
 </html>
