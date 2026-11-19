@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>German Parrot 德文聽寫</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    color-scheme: light;
+    --bg:#f6f4ef; --card:#ffffff; --ink:#1f2328; --muted:#6b7280; --line:#e5e1d8;
+    --field:#ffffff; --hover:#f3f1ec; --soft:#fbfaf7; --track:#ece8df; --placeholder:#9aa0a6;
+    --accent:#1f6f5c; --accent-soft:#e3f1ec; --accent-line:#bfe0d4;
+    --ok:#2f9e62; --ok-bg:#f3fbf6; --bad:#d9483b; --bad-bg:#fdecea; --case:#8e5bd8; --case-bg:#f2ecfb; --typing:#b7791f;
+    --empty:#b9b3a6; --rest:#cfc8b8;
+    --notice-bg:#fff7e6; --notice-line:#f2d9a6; --notice-ink:#7a5a12;
+    --shadow:rgba(31,111,92,.25); --overlay:rgba(20,20,20,.35);
+    --radius:14px;
+  }
+  [data-theme="dark"]{
+    color-scheme: dark;
+    --bg:#121417; --card:#1b1e23; --ink:#e8e6e1; --muted:#9aa1ab; --line:#2e333a;
+    --field:#23272e; --hover:#262b32; --soft:#171a1e; --track:#2a2f36; --placeholder:#6f7780;
+    --accent:#3fb28f; --accent-soft:#1c3a32; --accent-line:#2b5a4c;
+    --ok:#4cc488; --ok-bg:#16291f; --bad:#ff6b5e; --bad-bg:#3a1d1b; --case:#b48cff; --case-bg:#2c2240; --typing:#e0a83a;
+    --empty:#5b616a; --rest:#4a5058;
+    --notice-bg:#2e2716; --notice-line:#5a4a22; --notice-ink:#f0d590;
+    --shadow:rgba(0,0,0,.4); --overlay:rgba(0,0,0,.6);
+  }
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,"Noto Sans TC",system-ui,sans-serif;line-height:1.5;transition:background .2s,color .2s}
+  header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:16px 24px;border-bottom:1px solid var(--line);background:var(--card)}
+  .brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:18px}
+  .brand .logo{width:34px;height:34px;border-radius:10px;background:var(--accent);display:grid;place-items:center;color:#fff;font-size:18px}
+  .brand small{display:block;font-weight:500;color:var(--muted);font-size:12px}
+  .head-right{display:flex;align-items:center;gap:12px}
+  .voice-wrap{display:flex;align-items:center;gap:8px;font-size:13px;color:var(--muted)}
+  select{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:8px;background:var(--field);color:var(--ink);max-width:220px}
+  .theme-btn{font:inherit;font-size:13px;padding:6px 12px;border:1px solid var(--line);border-radius:999px;background:var(--field);color:var(--ink);cursor:pointer;white-space:nowrap}
+  .theme-btn:hover{background:var(--hover)}
+  .layout{display:grid;grid-template-columns:260px 1fr;gap:20px;max-width:1100px;margin:20px auto;padding:0 20px}
+  @media (max-width:820px){.layout{grid-template-columns:1fr} .voice-wrap span{display:none}}
+  aside .card{padding:14px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:var(--radius)}
+  .side-title{font-size:12px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin:4px 4px 10px}
+  .lesson{display:block;width:100%;text-align:left;border:1px solid transparent;background:none;padding:10px 12px;border-radius:10px;cursor:pointer;font:inherit;color:inherit;margin-bottom:4px}
+  .lesson:hover{background:var(--hover)}
+  .lesson.active{background:var(--accent-soft);border-color:var(--accent-line)}
+  .lesson .name{font-weight:600;font-size:14px}
+  .lesson .meta{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:2px}
+  .mini-bar{height:4px;background:var(--track);border-radius:4px;margin-top:6px;overflow:hidden}
+  .mini-bar i{display:block;height:100%;background:var(--ok);width:0}
+  .add-btn{width:100%;margin-top:8px}
+  main .card{padding:24px}
+  .top-row{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap}
+  .lesson-title{font-size:20px;font-weight:700;margin:0}
+  .counter{font-size:13px;color:var(--muted)}
+  .progress{height:6px;background:var(--track);border-radius:6px;margin:14px 0 22px;overflow:hidden}
+  .progress i{display:block;height:100%;background:var(--accent);transition:width .3s}
+  .player{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .play{width:64px;height:64px;border-radius:50%;border:none;background:var(--accent);color:#fff;font-size:24px;cursor:pointer;display:grid;place-items:center;box-shadow:0 4px 14px var(--shadow)}
+  .play:hover{filter:brightness(1.08)}
+  .speeds{display:flex;gap:6px}
+  .chip{border:1px solid var(--line);background:var(--field);border-radius:999px;padding:6px 12px;font:inherit;font-size:13px;cursor:pointer;color:var(--ink)}
+  .chip.on{background:var(--ink);color:var(--card);border-color:var(--ink)}
+  .stats{margin-left:auto;font-size:13px;color:var(--muted);display:flex;gap:14px}
+  .words{min-height:84px;margin:24px 0 16px;padding:16px;border:1px dashed var(--line);border-radius:12px;background:var(--soft);font-family:"JetBrains Mono",monospace;font-size:19px;line-height:2.1}
+  .w{display:inline-block;margin:0 6px 0 0;padding:0 3px;border-radius:5px;white-space:pre}
+  .w.empty{color:var(--empty);letter-spacing:.12em}
+  .w.ok{color:var(--ok)}
+  .w.case{color:var(--case);background:var(--case-bg)}
+  .w.bad{color:var(--bad);background:var(--bad-bg);text-decoration:line-through;text-decoration-thickness:1px}
+  .w.typing{color:var(--typing)}
+  .w.typing .rest{color:var(--rest);letter-spacing:.12em}
+  .w.extra{color:var(--bad);background:var(--bad-bg)}
+  .input-row{position:relative}
+  input.answer{width:100%;font:inherit;font-size:18px;padding:14px 16px;border:2px solid var(--line);border-radius:12px;outline:none;background:var(--field);color:var(--ink);caret-color:var(--accent)}
+  input.answer::placeholder{color:var(--placeholder)}
+  input.answer:focus{border-color:var(--accent)}
+  input.answer.done{border-color:var(--ok);background:var(--ok-bg);color:var(--ink)}
+  .umlauts{display:flex;gap:6px;margin-top:10px;flex-wrap:wrap}
+  .umlauts button{font:inherit;font-weight:600;width:40px;height:36px;border:1px solid var(--line);background:var(--field);color:var(--ink);border-radius:8px;cursor:pointer}
+  .umlauts button:hover{background:var(--hover)}
+  .actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+  .btn{font:inherit;font-size:14px;font-weight:600;padding:10px 16px;border-radius:10px;border:1px solid var(--line);background:var(--field);color:var(--ink);cursor:pointer}
+  .btn:hover{background:var(--hover)}
+  .btn.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+  .btn.primary:hover{filter:brightness(1.08);background:var(--accent)}
+  .btn:disabled{opacity:.45;cursor:not-allowed}
+  .feedback{margin-top:18px;padding:14px 16px;border-radius:12px;background:var(--accent-soft);display:none}
+  .feedback.show{display:block}
+  .feedback .de{font-weight:600}
+  .feedback .zh{color:var(--muted);margin-top:4px}
+  .feedback .badge{display:inline-block;font-size:12px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--ok);color:#fff;margin-bottom:6px}
+  .feedback .badge.meh{background:var(--typing)}
+  .keys{margin-top:18px;font-size:12px;color:var(--muted);display:flex;gap:16px;flex-wrap:wrap}
+  kbd{font-family:"JetBrains Mono",monospace;font-size:11px;padding:1px 6px;border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;background:var(--field);color:var(--ink)}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-top:6px}
+  .legend span::before{content:"";display:inline-block;width:9px;height:9px;border-radius:50%;margin-right:5px;vertical-align:middle;background:var(--c)}
+  .notice{background:var(--notice-bg);border:1px solid var(--notice-line);color:var(--notice-ink);border-radius:10px;padding:10px 14px;font-size:13px;margin-bottom:16px;display:none}
+  .notice.show{display:block}
+  .summary{text-align:center;padding:20px 0}
+  .summary h2{margin:0 0 6px}
+  .summary .nums{display:flex;justify-content:center;gap:28px;margin:22px 0}
+  .summary .nums b{display:block;font-size:28px}
+  .summary .nums span{font-size:12px;color:var(--muted)}
+  .modal-bg{position:fixed;inset:0;background:var(--overlay);display:none;align-items:center;justify-content:center;padding:20px;z-index:10}
+  .modal-bg.show{display:flex}
+  .modal{background:var(--card);color:var(--ink);border:1px solid var(--line);border-radius:16px;padding:22px;width:min(560px,100%)}
+  .modal h3{margin:0 0 6px}
+  .modal p{margin:0 0 12px;color:var(--muted);font-size:13px}
+  .modal input,.modal textarea{width:100%;font:inherit;padding:10px 12px;border:1px solid var(--line);border-radius:10px;margin-bottom:10px;background:var(--field);color:var(--ink)}
+  .modal input::placeholder,.modal textarea::placeholder{color:var(--placeholder)}
+  .modal textarea{min-height:160px;resize:vertical}
+  .modal .row{display:flex;justify-content:flex-end;gap:8px}
+  .del{font-size:11px;color:var(--bad);background:none;border:none;cursor:pointer;padding:0}
+</style>
+</head>
+<body>
+<header>
+  <div class="brand"><div class="logo">🦜</div><div>German Parrot<small>德文逐句聽寫</small></div></div>
+  <div class="head-right"><div class="voice-wrap"><span>語音</span> <select id="voiceSel"></select></div><button class="theme-btn" id="themeBtn">🌙 夜間</button></div>
+</header>
+
+<div class="layout">
+  <aside>
+    <div class="card">
+      <div class="side-title">課程</div>
+      <div id="lessonList"></div>
+      <button class="btn add-btn" id="addBtn">＋ 貼上自己的德文</button>
+    </div>
+  </aside>
+
+  <main>
+    <div class="notice" id="voiceNotice">這個瀏覽器找不到德文語音。建議用 Chrome 或 Edge 開啟；macOS 可到「系統設定 → 輔助使用 → 朗讀內容」下載德文語音（例如 Anna）。</div>
+    <div class="card" id="practice">
+      <div class="top-row">
+        <h1 class="lesson-title" id="lessonTitle"></h1>
+        <div class="counter" id="counter"></div>
+      </div>
+      <div class="progress"><i id="progBar"></i></div>
+
+      <div class="player">
+        <button class="play" id="playBtn" title="播放 (Enter)">▶</button>
+        <div>
+          <div class="speeds" id="speeds">
+            <button class="chip" data-rate="0.6">0.6×</button>
+            <button class="chip" data-rate="0.8">0.8×</button>
+            <button class="chip on" data-rate="1">1.0×</button>
+          </div>
+          <div class="legend">
+            <span style="--c:var(--ok)">正確</span>
+            <span style="--c:var(--case)">大小寫錯</span>
+            <span style="--c:var(--bad)">拼錯</span>
+            <span style="--c:var(--typing)">輸入中</span>
+          </div>
+        </div>
+        <div class="stats"><span>重播 <b id="sReplay">0</b></span><span>提示 <b id="sHint">0</b></span><span>錯字 <b id="sErr">0</b></span></div>
+      </div>
+
+      <div class="words" id="words"></div>
+
+      <div class="input-row">
+        <input class="answer" id="answer" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="先按 ▶ 聽，再把聽到的句子打出來…">
+      </div>
+      <div class="umlauts" id="umlauts">
+        <button>ä</button><button>ö</button><button>ü</button><button>ß</button><button>Ä</button><button>Ö</button><button>Ü</button>
+      </div>
+
+      <div class="actions">
+        <button class="btn" id="hintBtn">提示下一個字</button>
+        <button class="btn" id="revealBtn">顯示答案</button>
+        <button class="btn" id="prevBtn">← 上一句</button>
+        <button class="btn primary" id="nextBtn">下一句 →</button>
+      </div>
+
+      <div class="feedback" id="feedback"></div>
+
+      <div class="keys">
+        <span><kbd>Enter</kbd> 重播／完成後下一句</span>
+        <span><kbd>Shift</kbd>+<kbd>Enter</kbd> 提示</span>
+        <span><kbd>Esc</kbd> 慢速播放</span>
+        <span>ä 可打 ae，ß 可打 ss；標點不用打</span>
+      </div>
+    </div>
+
+    <div class="card summary" id="summary" style="display:none"></div>
+  </main>
+</div>
+
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <h3>貼上自己的德文</h3>
+    <p>貼一段德文（新聞、課本、歌詞以外的文字都可以），會自動依句號、問號、驚嘆號切成句子。</p>
+    <input id="customTitle" placeholder="課程名稱，例如：DW Top-Thema 11/19">
+    <textarea id="customText" placeholder="Heute ist das Wetter schön. Wir gehen in den Park."></textarea>
+    <div class="row">
+      <button class="btn" id="cancelCustom">取消</button>
+      <button class="btn primary" id="saveCustom">建立課程</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const BUILTIN = [
+  { id:"cafe", title:"Im Café", level:"A2", sentences:[
+    ["Ich hätte gern einen Kaffee mit Milch.","我想要一杯加牛奶的咖啡。"],
+    ["Möchten Sie auch etwas essen?","您也想吃點東西嗎？"],
+    ["Ja, ein Stück Apfelkuchen, bitte.","好，請給我一塊蘋果蛋糕。"],
+    ["Zum Mitnehmen oder zum Hieressen?","外帶還是內用？"],
+    ["Ich esse hier, danke.","我在這裡吃，謝謝。"],
+    ["Das macht zusammen sieben Euro fünfzig.","總共七歐元五十分。"]
+  ]},
+  { id:"bahn", title:"Mit der Bahn", level:"A2–B1", sentences:[
+    ["Der Zug nach Hamburg hat zwanzig Minuten Verspätung.","往漢堡的火車誤點二十分鐘。"],
+    ["Entschuldigung, von welchem Gleis fährt der Zug ab?","不好意思，火車從哪個月台出發？"],
+    ["Sie müssen in Hannover umsteigen.","您必須在漢諾威轉車。"],
+    ["Ich habe meine Fahrkarte online gekauft.","我在網路上買了車票。"],
+    ["Leider ist der Anschlusszug schon weg.","可惜轉乘的火車已經開走了。"],
+    ["Der nächste Zug kommt in einer Stunde.","下一班火車一小時後到。"]
+  ]},
+  { id:"arbeit", title:"Bei der Arbeit", level:"B1", sentences:[
+    ["Können wir das Meeting auf morgen verschieben?","我們可以把會議延到明天嗎？"],
+    ["Ich schicke Ihnen die Unterlagen per E-Mail.","我會用電子郵件把資料寄給您。"],
+    ["Der Roboter hat heute Morgen einen Fehler gemeldet.","機器人今天早上回報了一個錯誤。"],
+    ["Wir müssen die Software noch einmal testen.","我們必須再測試一次軟體。"],
+    ["Bis Freitag sollte alles fertig sein.","星期五之前應該全部完成。"],
+    ["Vielen Dank für Ihre Geduld.","非常感謝您的耐心。"]
+  ]},
+  { id:"wochenende", title:"Am Wochenende", level:"B1", sentences:[
+    ["Am Samstag bin ich mit Freunden wandern gegangen.","星期六我和朋友去健行了。"],
+    ["Das Wetter war besser, als wir erwartet hatten.","天氣比我們預期的好。"],
+    ["Unterwegs haben wir in einer kleinen Hütte gegessen.","路上我們在一間小木屋吃了飯。"],
+    ["Abends war ich so müde, dass ich sofort eingeschlafen bin.","晚上我累到馬上就睡著了。"],
+    ["Nächstes Wochenende will ich zu Hause bleiben.","下個週末我想待在家。"],
+    ["Vielleicht lese ich endlich das Buch, das du mir empfohlen hast.","也許我終於會讀你推薦給我的那本書。"]
+  ]}
+];
+
+// ---------- storage (best effort) ----------
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+};
+let custom = store.get("gp-custom", []);
+let progress = store.get("gp-progress", {});
+const lessons = () => BUILTIN.concat(custom);
+
+// ---------- text helpers ----------
+const WORD_RE = /[\p{L}\p{N}]+(?:[-'’][\p{L}\p{N}]+)*/gu;
+const tokenize = s => s.match(WORD_RE) || [];
+const deUml = w => w.replace(/’/g,"'").replace(/ä/g,"ae").replace(/ö/g,"oe").replace(/ü/g,"ue")
+  .replace(/Ä/g,"Ae").replace(/Ö/g,"Oe").replace(/Ü/g,"Ue").replace(/ß/g,"ss");
+const esc = s => s.replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+function judge(typed, target){
+  if (typed === target) return "ok";
+  const a = deUml(typed), b = deUml(target);
+  if (a === b) return "ok";
+  if (a.toLowerCase() === b.toLowerCase()) return "case";
+  return "bad";
+}
+function isPrefix(typed, target){
+  return deUml(target).toLowerCase().startsWith(deUml(typed).toLowerCase());
+}
+
+// ---------- speech ----------
+let voices = [], voice = null, rate = 1;
+const voiceSel = document.getElementById("voiceSel");
+function loadVoices(){
+  if (!("speechSynthesis" in window)) { document.getElementById("voiceNotice").classList.add("show"); return; }
+  voices = speechSynthesis.getVoices().filter(v => /^de(-|_|$)/i.test(v.lang));
+  const saved = store.get("gp-voice", null);
+  voiceSel.innerHTML = voices.map((v,i) => `<option value="${i}">${esc(v.name)} (${v.lang})</option>`).join("") || "<option>無德文語音</option>";
+  let idx = voices.findIndex(v => v.name === saved);
+  if (idx < 0) idx = voices.findIndex(v => /google|natural|online/i.test(v.name));
+  if (idx < 0) idx = 0;
+  voice = voices[idx] || null;
+  if (voice) voiceSel.value = idx;
+  document.getElementById("voiceNotice").classList.toggle("show", voices.length === 0);
+}
+if ("speechSynthesis" in window){ loadVoices(); speechSynthesis.onvoiceschanged = loadVoices; } else loadVoices();
+voiceSel.onchange = () => { voice = voices[+voiceSel.value] || null; if (voice) store.set("gp-voice", voice.name); };
+function speak(text, r){
+  if (!("speechSynthesis" in window)) return;
+  try{
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = voice ? voice.lang : "de-DE";
+    if (voice) u.voice = voice;
+    u.rate = r || rate;
+    speechSynthesis.speak(u);
+  }catch(e){}
+}
+
+// ---------- state ----------
+let L = 0, S = 0;
+let sess = null; // per-sentence session
+const $ = id => document.getElementById(id);
+const answer = $("answer");
+
+function lessonDone(id){ return progress[id] || []; }
+function markDone(id, i, perfect){
+  const arr = progress[id] || [];
+  if (!arr.includes(i)) arr.push(i);
+  progress[id] = arr; store.set("gp-progress", progress);
+  if (perfect){ const k = id + "-perfect"; const p = progress[k] || []; if(!p.includes(i)) p.push(i); progress[k] = p; store.set("gp-progress", progress); }
+}
+
+function renderList(){
+  const all = lessons();
+  $("lessonList").innerHTML = all.map((l, i) => {
+    const d = lessonDone(l.id).length, n = l.sentences.length;
+    const del = l.custom ? `<button class="del" data-del="${i}">刪除</button>` : "";
+    return `<button class="lesson ${i===L?"active":""}" data-i="${i}">
+      <div class="name">${esc(l.title)}</div>
+      <div class="meta"><span>${esc(l.level)}</span><span>${d}/${n} ${del}</span></div>
+      <div class="mini-bar"><i style="width:${n?d/n*100:0}%"></i></div></button>`;
+  }).join("");
+}
+$("lessonList").onclick = e => {
+  const del = e.target.closest("[data-del]");
+  if (del){
+    e.stopPropagation();
+    const l = lessons()[+del.dataset.del];
+    custom = custom.filter(c => c.id !== l.id); store.set("gp-custom", custom);
+    if (L >= lessons().length) L = 0; openLesson(L); return;
+  }
+  const b = e.target.closest(".lesson"); if (!b) return;
+  openLesson(+b.dataset.i);
+};
+
+function openLesson(i, startAt){
+  L = i;
+  const l = lessons()[L];
+  const done = lessonDone(l.id);
+  S = startAt != null ? startAt : (() => { for (let k=0;k<l.sentences.length;k++) if(!done.includes(k)) return k; return 0; })();
+  $("practice").style.display = ""; $("summary").style.display = "none";
+  $("lessonTitle").textContent = l.title;
+  renderList(); openSentence();
+}
+
+function openSentence(){
+  const l = lessons()[L];
+  const [de, zh] = l.sentences[S];
+  sess = { de, zh, words: tokenize(de), replays:0, hints:0, errSet:new Set(), revealed:false, complete:false };
+  answer.value = ""; answer.classList.remove("done"); answer.disabled = false;
+  $("feedback").classList.remove("show");
+  $("counter").textContent = `第 ${S+1} / ${l.sentences.length} 句 · ${l.level}`;
+  $("progBar").style.width = `${S / l.sentences.length * 100}%`;
+  $("prevBtn").disabled = S === 0;
+  $("nextBtn").textContent = S === l.sentences.length-1 ? "完成課程 →" : "下一句 →";
+  render(); answer.focus();
+}
+
+function render(){
+  const raw = answer.value;
+  const typed = tokenize(raw);
+  const trailing = /[\s.,!?;:]$/.test(raw);
+  const T = sess.words;
+  let html = "", allOk = typed.length === T.length;
+  T.forEach((w, i) => {
+    const t = typed[i];
+    if (t == null){ allOk = false; html += `<span class="w empty">${"_".repeat(w.length)}</span>`; return; }
+    const finalized = i < typed.length - 1 || trailing;
+    let st = judge(t, w);
+    if (st !== "ok" && !finalized && isPrefix(t, w)) st = "typing";
+    else if (st !== "ok" && !finalized && st === "case") st = "case";
+    if (st !== "ok") allOk = false;
+    if (finalized && st === "bad") sess.errSet.add(i + ":" + t);
+    if (st === "ok") html += `<span class="w ok">${esc(w)}</span>`;
+    else if (st === "case") html += `<span class="w case">${esc(t)}</span>`;
+    else if (st === "typing") {
+      const rest = Math.max(0, w.length - t.length);
+      html += `<span class="w typing">${esc(t)}<span class="rest">${"_".repeat(rest)}</span></span>`;
+    } else html += `<span class="w bad">${esc(t)}</span>`;
+  });
+  for (let i = T.length; i < typed.length; i++){ allOk = false; html += `<span class="w extra">${esc(typed[i])}</span>`; }
+  $("words").innerHTML = html;
+  $("sReplay").textContent = sess.replays;
+  $("sHint").textContent = sess.hints;
+  $("sErr").textContent = sess.errSet.size;
+  if (allOk && !sess.complete) complete();
+}
+
+function complete(){
+  sess.complete = true;
+  answer.classList.add("done");
+  const perfect = !sess.revealed && sess.hints === 0 && sess.errSet.size === 0;
+  markDone(lessons()[L].id, S, perfect);
+  const label = sess.revealed ? "看了答案" : perfect ? "完美！" : "完成";
+  const fb = $("feedback");
+  fb.innerHTML = `<span class="badge ${perfect?"":"meh"}">${label}</span>
+    <div class="de">${esc(sess.de)}</div>${sess.zh ? `<div class="zh">${esc(sess.zh)}</div>` : ""}`;
+  fb.classList.add("show");
+  $("progBar").style.width = `${(S+1) / lessons()[L].sentences.length * 100}%`;
+  renderList();
+}
+
+function next(){
+  const l = lessons()[L];
+  if (S < l.sentences.length - 1){ S++; openSentence(); speak(sess.de); }
+  else showSummary();
+}
+function prev(){ if (S > 0){ S--; openSentence(); } }
+
+function hint(){
+  if (sess.complete) return;
+  const typed = tokenize(answer.value), T = sess.words;
+  let i = 0;
+  while (i < T.length && typed[i] != null && judge(typed[i], T[i]) === "ok") i++;
+  if (i >= T.length) return;
+  sess.hints++;
+  answer.value = T.slice(0, i+1).join(" ") + (i+1 < T.length ? " " : "");
+  answer.focus(); render();
+}
+function reveal(){
+  if (sess.complete) return;
+  sess.revealed = true;
+  answer.value = sess.words.join(" ");
+  render();
+}
+
+function showSummary(){
+  const l = lessons()[L];
+  const n = l.sentences.length, d = lessonDone(l.id).length, p = (progress[l.id+"-perfect"]||[]).length;
+  $("practice").style.display = "none";
+  const s = $("summary"); s.style.display = "";
+  const hasNext = L < lessons().length - 1;
+  s.innerHTML = `<h2>🎉 ${esc(l.title)} 完成</h2><div class="counter">${esc(l.level)}</div>
+    <div class="nums"><div><b>${d}/${n}</b><span>完成句數</span></div><div><b>${p}</b><span>零提示零錯字</span></div></div>
+    <div class="actions" style="justify-content:center">
+      <button class="btn" id="redo">重做這課</button>
+      ${hasNext ? `<button class="btn primary" id="nextLesson">下一課 →</button>` : ""}
+    </div>`;
+  $("redo").onclick = () => { progress[l.id] = []; progress[l.id+"-perfect"] = []; store.set("gp-progress", progress); openLesson(L, 0); };
+  if (hasNext) $("nextLesson").onclick = () => openLesson(L+1);
+  $("progBar").style.width = "100%";
+}
+
+// ---------- events ----------
+$("playBtn").onclick = () => { sess.replays++; speak(sess.de); render(); answer.focus(); };
+$("speeds").onclick = e => {
+  const b = e.target.closest(".chip"); if (!b) return;
+  rate = +b.dataset.rate;
+  document.querySelectorAll("#speeds .chip").forEach(c => c.classList.toggle("on", c === b));
+  speak(sess.de); answer.focus();
+};
+answer.addEventListener("input", render);
+answer.addEventListener("keydown", e => {
+  if (e.key === "Enter" && e.shiftKey){ e.preventDefault(); hint(); }
+  else if (e.key === "Enter"){ e.preventDefault(); if (sess.complete) next(); else { sess.replays++; speak(sess.de); render(); } }
+  else if (e.key === "Escape"){ e.preventDefault(); sess.replays++; speak(sess.de, 0.6); render(); }
+});
+$("umlauts").onclick = e => {
+  const b = e.target.closest("button"); if (!b) return;
+  const s = answer.selectionStart ?? answer.value.length, en = answer.selectionEnd ?? s;
+  answer.value = answer.value.slice(0, s) + b.textContent + answer.value.slice(en);
+  answer.focus(); answer.setSelectionRange(s+1, s+1); render();
+};
+$("hintBtn").onclick = hint;
+$("revealBtn").onclick = reveal;
+$("nextBtn").onclick = next;
+$("prevBtn").onclick = prev;
+
+// custom lessons
+$("addBtn").onclick = () => { $("modal").classList.add("show"); $("customTitle").focus(); };
+$("cancelCustom").onclick = () => $("modal").classList.remove("show");
+$("saveCustom").onclick = () => {
+  const text = $("customText").value.replace(/\s+/g, " ").trim();
+  const parts = (text.match(/[^.!?]+[.!?]*/g) || []).map(s => s.trim()).filter(s => tokenize(s).length);
+  if (!parts.length){ $("customText").focus(); return; }
+  const title = $("customTitle").value.trim() || "我的課程 " + (custom.length + 1);
+  custom.push({ id:"c" + Date.now(), title, level:"自訂", custom:true, sentences: parts.map(p => [p, ""]) });
+  store.set("gp-custom", custom);
+  $("customTitle").value = ""; $("customText").value = "";
+  $("modal").classList.remove("show");
+  openLesson(lessons().length - 1, 0);
+};
+
+
+// ---------- theme ----------
+(function(){
+  const btn = document.getElementById("themeBtn");
+  let saved = null; try{ saved = localStorage.getItem("gp-theme"); }catch(e){}
+  const sysDark = window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches;
+  function apply(t){
+    document.documentElement.setAttribute("data-theme", t);
+    btn.textContent = t === "dark" ? "☀️ 日間" : "🌙 夜間";
+  }
+  apply(saved || (sysDark ? "dark" : "light"));
+  btn.onclick = () => {
+    const t = document.documentElement.getAttribute("data-theme") === "dark" ? "light" : "dark";
+    apply(t); try{ localStorage.setItem("gp-theme", t); }catch(e){}
+  };
+})();
+
+openLesson(0);
+</script>
+</body>
+</html>
